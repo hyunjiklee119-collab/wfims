@@ -1,0 +1,2092 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>스마트 설비 점검 시스템 | SafetyCheck Pro</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Pretendard Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .font-mono-code {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom, 1rem);
+    }
+    .fade-in {
+      animation: fadeIn 0.2s ease-in-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-rose-500 selection:text-white">
+
+  <!-- ==================== 최상단 헤더 네비게이션 ==================== -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-xs">
+    <div class="max-w-7xl mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between gap-2">
+      <div class="flex items-center space-x-2.5 sm:space-x-3 shrink-0">
+        <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-rose-600 via-indigo-600 to-amber-500 flex items-center justify-center text-white shadow-md shadow-rose-200">
+          <i class="fa-solid fa-shield-halved text-sm sm:text-base"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-1.5 sm:space-x-2">
+            <h1 class="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight">SafetyCheck Pro</h1>
+            <span id="activeModeBadge" class="hidden sm:inline-block bg-rose-50 text-rose-700 border border-rose-200 text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full font-bold">1. 시설장비</span>
+          </div>
+          <p class="text-[10px] sm:text-[11px] text-slate-500 font-medium truncate max-w-[150px] sm:max-w-none" id="currentPeriodDisplay">2026년 정기 안전·방재 점검</p>
+        </div>
+      </div>
+
+      <!-- 데스크톱 점검 탭 바 -->
+      <nav class="hidden lg:flex items-center bg-slate-100/90 p-1 rounded-xl border border-slate-200/80 text-xs font-bold gap-0.5" id="desktopNavTabs">
+        <button class="mode-tab-btn px-3 py-1.5 rounded-lg transition-all bg-white text-slate-900 shadow-xs flex items-center gap-1.5" data-mode="equip">
+          <i class="fa-solid fa-fire-extinguisher text-rose-600"></i>
+          <span>1. 시설장비</span>
+        </button>
+        <button class="mode-tab-btn px-3 py-1.5 rounded-lg transition-all text-slate-500 hover:text-slate-800 flex items-center gap-1.5" data-mode="area">
+          <i class="fa-solid fa-map-location-dot text-indigo-500"></i>
+          <span>2. MY AREA</span>
+        </button>
+        <button class="mode-tab-btn px-3 py-1.5 rounded-lg transition-all text-slate-500 hover:text-slate-800 flex items-center gap-1.5" data-mode="zone">
+          <i class="fa-solid fa-building-user text-amber-500"></i>
+          <span>3. MY ZONE (부서)</span>
+        </button>
+        <button class="mode-tab-btn px-3 py-1.5 rounded-lg transition-all text-slate-500 hover:text-slate-800 flex items-center gap-1.5" data-mode="history">
+          <i class="fa-solid fa-clipboard-list text-teal-600"></i>
+          <span>점검 기록 📊</span>
+        </button>
+        <button class="mode-tab-btn px-3 py-1.5 rounded-lg transition-all text-slate-500 hover:text-slate-800 flex items-center gap-1.5" data-mode="master">
+          <i class="fa-solid fa-sliders text-slate-500"></i>
+          <span>기준정보 🔒</span>
+        </button>
+      </nav>
+
+      <!-- 우측 툴바 -->
+      <div class="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+        <div id="netStatusBadge" class="flex items-center space-x-1 px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-emerald-50 border border-emerald-200 text-emerald-700">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span id="netStatusText">온라인</span>
+        </div>
+        
+        <button id="btnExportData" title="전체 점검결과 CSV 다운로드" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors">
+          <i class="fa-solid fa-file-excel text-sm sm:text-base text-emerald-600"></i>
+        </button>
+        <button id="btnOpenSettings" title="데이터 관리" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors">
+          <i class="fa-solid fa-gear text-sm sm:text-base"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- 모바일 스크롤 탭 바 -->
+    <div class="flex lg:hidden border-t border-slate-200/80 px-2.5 py-1.5 overflow-x-auto gap-1.5 bg-slate-100/70 no-scrollbar touch-pan-x" id="mobileNavTabs">
+      <button class="mode-tab-btn px-3 py-1.5 text-xs rounded-xl font-bold shrink-0 bg-white text-slate-900 shadow-xs border border-slate-200 flex items-center gap-1.5" data-mode="equip">
+        <i class="fa-solid fa-fire-extinguisher text-rose-600 text-xs"></i>
+        <span>1. 시설장비</span>
+      </button>
+      <button class="mode-tab-btn px-3 py-1.5 text-xs rounded-xl font-semibold shrink-0 text-slate-600 hover:bg-white/80 transition-colors flex items-center gap-1.5" data-mode="area">
+        <i class="fa-solid fa-map-location-dot text-indigo-500 text-xs"></i>
+        <span>2. MY AREA</span>
+      </button>
+      <button class="mode-tab-btn px-3 py-1.5 text-xs rounded-xl font-semibold shrink-0 text-slate-600 hover:bg-white/80 transition-colors flex items-center gap-1.5" data-mode="zone">
+        <i class="fa-solid fa-building-user text-amber-500 text-xs"></i>
+        <span>3. MY ZONE</span>
+      </button>
+      <button class="mode-tab-btn px-3 py-1.5 text-xs rounded-xl font-semibold shrink-0 text-slate-600 hover:bg-white/80 transition-colors flex items-center gap-1.5" data-mode="history">
+        <i class="fa-solid fa-clipboard-list text-teal-600 text-xs"></i>
+        <span>점검기록 📊</span>
+      </button>
+      <button class="mode-tab-btn px-3 py-1.5 text-xs rounded-xl font-semibold shrink-0 text-slate-600 hover:bg-white/80 transition-colors flex items-center gap-1.5" data-mode="master">
+        <i class="fa-solid fa-sliders text-slate-500 text-xs"></i>
+        <span>기준정보 🔒</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto w-full px-3 sm:px-4 pt-3 sm:pt-4 flex-1 flex flex-col space-y-3.5 sm:space-y-4">
+    
+    <!-- 점검 진행 현황 대시보드 카드 -->
+    <section class="bg-white rounded-2xl p-3.5 sm:p-4 shadow-xs border border-slate-200/90">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="space-y-1">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Status</span>
+            <span id="statModeTitle" class="text-xs px-2 py-0.5 rounded-md font-bold bg-rose-50 text-rose-700 border border-rose-100">시설장비 예방점검</span>
+            <span id="statTargetScopeDisplay" class="text-xs px-2 py-0.5 rounded-md font-bold bg-slate-100 text-slate-700 truncate max-w-[200px]">전체 대상</span>
+          </div>
+          <div class="flex items-baseline space-x-2 pt-0.5">
+            <span class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono" id="statPercent">0%</span>
+            <span class="text-xs text-slate-500 font-semibold" id="statCounts">(0 / 0개 완료)</span>
+          </div>
+        </div>
+        
+        <!-- 통계 메트릭 배지 -->
+        <div class="grid grid-cols-3 sm:flex sm:items-center gap-1.5 sm:gap-3 pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-100 text-center sm:text-left">
+          <div class="px-2.5 py-1.5 rounded-xl bg-emerald-50/70 border border-emerald-200/60 flex flex-col sm:flex-row sm:items-center sm:space-x-1.5">
+            <span class="text-[10px] text-slate-500 sm:text-slate-600 font-semibold flex items-center justify-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span> 양호
+            </span>
+            <span id="statNormalCount" class="text-xs sm:text-sm text-emerald-700 font-black font-mono">0</span>
+          </div>
+          <div class="px-2.5 py-1.5 rounded-xl bg-rose-50/70 border border-rose-200/60 flex flex-col sm:flex-row sm:items-center sm:space-x-1.5">
+            <span class="text-[10px] text-slate-500 sm:text-slate-600 font-semibold flex items-center justify-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-rose-500 shrink-0"></span> 이상
+            </span>
+            <span id="statIssueCount" class="text-xs sm:text-sm text-rose-700 font-black font-mono">0</span>
+          </div>
+          <div class="px-2.5 py-1.5 rounded-xl bg-slate-100/80 border border-slate-200/70 flex flex-col sm:flex-row sm:items-center sm:space-x-1.5">
+            <span class="text-[10px] text-slate-500 sm:text-slate-600 font-semibold flex items-center justify-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-slate-400 shrink-0"></span> 미점검
+            </span>
+            <span id="statPendingCount" class="text-xs sm:text-sm text-slate-700 font-black font-mono">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 프로그레스 바 -->
+      <div class="w-full bg-slate-100 h-2 sm:h-2.5 rounded-full mt-3 overflow-hidden flex">
+        <div id="statProgressBarPass" class="bg-emerald-500 h-full transition-all duration-300" style="width: 0%"></div>
+        <div id="statProgressBarIssue" class="bg-rose-500 h-full transition-all duration-300" style="width: 0%"></div>
+      </div>
+    </section>
+
+    <!-- ==================== 1. 시설·장비 예방 점검 뷰 ==================== -->
+    <div id="viewEquipSection" class="space-y-3.5 sm:space-y-4 flex flex-col flex-1">
+      <section class="bg-white rounded-2xl p-3.5 sm:p-4 shadow-xs border border-slate-200/90 space-y-3">
+        <!-- My Area 빠른 선택 칩 -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-xs font-black text-slate-700 flex items-center gap-1.5">
+              <i class="fa-solid fa-location-dot text-rose-500"></i>
+              <span>MY AREA 빠른 선택</span>
+            </label>
+            <span class="text-[10px] sm:text-[11px] text-slate-400 font-medium">터치 시 해당 구역 설비 자동 필터링</span>
+          </div>
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar touch-pan-x" id="equipAreaChipsContainer"></div>
+        </div>
+
+        <!-- 계층형 필터 드롭다운 -->
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-2.5 pt-1">
+          <div>
+            <label class="block text-[10px] sm:text-[11px] font-bold text-slate-500 mb-0.5">설비 종류</label>
+            <select id="equipFilterCategory" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-rose-500 focus:outline-none">
+              <option value="">전체 종류</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] sm:text-[11px] font-bold text-slate-500 mb-0.5">사업장</label>
+            <select id="equipFilterFacility" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-rose-500 focus:outline-none">
+              <option value="">전체 사업장</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] sm:text-[11px] font-bold text-slate-500 mb-0.5">층수 (Floor)</label>
+            <select id="equipFilterFloor" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-rose-500 focus:outline-none">
+              <option value="">전체 층수</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] sm:text-[11px] font-bold text-slate-500 mb-0.5">설치 룸 / 상세위치</label>
+            <select id="equipFilterRoom" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-rose-500 focus:outline-none">
+              <option value="">전체 룸/구역</option>
+            </select>
+          </div>
+          <div class="col-span-2 lg:col-span-1">
+            <label class="block text-[10px] sm:text-[11px] font-bold text-slate-500 mb-0.5">빠른 검색 (QR/관리번호/위치)</label>
+            <div class="relative">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+              <input type="text" id="equipFilterSearch" placeholder="코드/번호/명칭..." 
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-rose-500 focus:outline-none">
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between pt-2 border-t border-slate-100 gap-2">
+          <div class="text-xs text-slate-600 font-semibold flex items-center justify-between sm:justify-start gap-2">
+            <span>조회 장비:</span>
+            <span id="equipFilteredCount" class="px-2.5 py-0.5 bg-rose-50 text-rose-700 rounded-md font-bold font-mono">0개소</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btnEquipResetFilter" class="flex-1 sm:flex-none px-3 py-2 text-xs text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl font-semibold transition-colors text-center border border-slate-200 sm:border-transparent">
+              <i class="fa-solid fa-arrow-rotate-left mr-1"></i> 필터 리셋
+            </button>
+            <button id="btnEquipBatchPass" class="flex-2 sm:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-200 transition-all flex items-center justify-center gap-1.5 min-h-[38px]">
+              <i class="fa-solid fa-check-double"></i>
+              <span>전체 [O 양호] 처리</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 장비 카드 리스트 -->
+      <section id="equipCardListContainer" class="space-y-2.5 sm:space-y-3 pb-24"></section>
+    </div>
+
+    <!-- ==================== 2. MY AREA 순찰 점검 뷰 ==================== -->
+    <div id="viewAreaSection" class="hidden space-y-3.5 sm:space-y-4 flex flex-col flex-1">
+      <section class="bg-white rounded-2xl p-3.5 sm:p-4 shadow-xs border border-slate-200/90 space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+          <div>
+            <h2 class="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-1.5">
+              <i class="fa-solid fa-map-location-dot text-indigo-600"></i>
+              <span>MY AREA 순찰 점검 (구역별 특화 점검표)</span>
+            </h2>
+            <p class="text-xs text-slate-500">구역 환경 특성에 최적화된 방화 순찰 항목을 일괄 점검합니다.</p>
+          </div>
+          <button id="btnAreaBatchPass" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-200 transition-all flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-check-double"></i>
+            <span>전체 구역 [O 양호] 완료</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="areaCardsContainer"></div>
+      </section>
+    </div>
+
+    <!-- ==================== 3. MY ZONE (부서 위임) 점검 뷰 ==================== -->
+    <div id="viewZoneSection" class="hidden space-y-3.5 sm:space-y-4 flex flex-col flex-1">
+      <section class="bg-white rounded-2xl p-3.5 sm:p-4 shadow-xs border border-slate-200/90 space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+          <div>
+            <h2 class="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-1.5">
+              <i class="fa-solid fa-building-user text-amber-500"></i>
+              <span>MY ZONE 부서 점검 (세부 룸 단위 위임)</span>
+            </h2>
+            <p class="text-xs text-slate-500">각 부서가 관할하는 룸(Zone)의 일상 화재예방 점검을 자율 수행합니다.</p>
+          </div>
+          <button id="btnZoneBatchPass" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-200 transition-all flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-check-double"></i>
+            <span>조회 룸 [O 양호] 완료</span>
+          </button>
+        </div>
+
+        <!-- 부서 선택 칩 -->
+        <div>
+          <label class="block text-xs font-black text-slate-700 mb-1.5">담당 부서(Department) 필터링</label>
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar touch-pan-x" id="zoneDeptChipsContainer"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="zoneCardsContainer"></div>
+      </section>
+    </div>
+
+    <!-- ==================== 4. 점검 기록 조회 뷰 ==================== -->
+    <div id="viewHistorySection" class="hidden space-y-3.5 sm:space-y-4 flex flex-col flex-1">
+      <section class="bg-white rounded-2xl p-3.5 sm:p-4 shadow-xs border border-slate-200/90 space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-100 pb-3">
+          <div>
+            <h2 class="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-1.5">
+              <i class="fa-solid fa-clipboard-list text-teal-600"></i>
+              <span>점검 기록 조회 및 엑셀 다운로드</span>
+            </h2>
+            <p class="text-xs text-slate-500">기간별, 점검 모드별 완료 이력을 조회하고 사내 전산 보고용 CSV 파일로 추출합니다.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btnDownloadHistoryCSV" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-200 transition-all flex items-center gap-1.5">
+              <i class="fa-solid fa-file-excel"></i>
+              <span>조회결과 EXCEL 저장</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 기간 및 조건 필터 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 mb-0.5">점검 시작일</label>
+            <input type="date" id="historyFilterStartDate" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 mb-0.5">점검 종료일</label>
+            <input type="date" id="historyFilterEndDate" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 mb-0.5">점검 모드</label>
+            <select id="historyFilterMode" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500">
+              <option value="">전체 모드 (장비+구역+부서)</option>
+              <option value="EQUIP">1. 시설장비</option>
+              <option value="AREA">2. MY AREA</option>
+              <option value="ZONE">3. MY ZONE</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 mb-0.5">점검 판정 상태</label>
+            <select id="historyFilterStatus" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500">
+              <option value="">전체 상태 (양호+이상)</option>
+              <option value="PASS">O 양호</option>
+              <option value="ISSUE">X 이상 발생</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-xs text-slate-500 font-semibold pt-1">
+          <div>조회된 기록 건수: <span id="historyRecordCount" class="font-bold text-teal-700 font-mono">0건</span></div>
+          <button id="btnResetHistoryFilters" class="text-xs text-slate-500 hover:text-slate-800 hover:underline">
+            <i class="fa-solid fa-rotate-left mr-0.5"></i> 필터 초기화
+          </button>
+        </div>
+
+        <div class="overflow-x-auto border border-slate-200 rounded-xl custom-scrollbar">
+          <table class="w-full text-left text-xs divide-y divide-slate-200">
+            <thead class="bg-slate-50 font-bold text-slate-600">
+              <tr>
+                <th class="p-2.5 whitespace-nowrap">점검일시</th>
+                <th class="p-2.5 whitespace-nowrap">모드</th>
+                <th class="p-2.5 whitespace-nowrap">대상 코드 / 명칭</th>
+                <th class="p-2.5 whitespace-nowrap">위치 / 구역</th>
+                <th class="p-2.5 whitespace-nowrap">판정</th>
+                <th class="p-2.5 whitespace-nowrap">점검자</th>
+                <th class="p-2.5">특이사항</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody" class="divide-y divide-slate-100 font-medium"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- ==================== 5. 기준정보 마스터 관리 뷰 ==================== -->
+    <div id="viewMasterSection" class="hidden space-y-3.5 sm:space-y-4 flex flex-col flex-1">
+      <section class="bg-white rounded-2xl p-3.5 sm:p-4 shadow-xs border border-slate-200/90 space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-100 pb-2.5">
+          <div>
+            <h2 class="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-1.5">
+              <i class="fa-solid fa-lock text-slate-600"></i>
+              <span>기준정보 및 템플릿 마스터 관리 (관리자 모드)</span>
+            </h2>
+            <p class="text-xs text-slate-500">설비 등록, Zone 부서 위임 매핑, 점검표 템플릿 항목을 직접 편집합니다.</p>
+          </div>
+          <button id="btnLockMaster" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-colors">
+            <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> 관리자 로그아웃
+          </button>
+        </div>
+
+        <!-- 기준정보 서브 탭 -->
+        <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-full sm:w-auto">
+          <button id="btnSubTabEquipMaster" class="flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all bg-white text-slate-900 shadow-xs border border-slate-200">
+            설비/장비 마스터
+          </button>
+          <button id="btnSubTabZoneMaster" class="flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-lg transition-all">
+            Zone / 부서 매핑
+          </button>
+          <button id="btnSubTabTplMaster" class="flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-lg transition-all">
+            점검표 템플릿
+          </button>
+        </div>
+
+        <!-- 5-1. 설비 마스터 그리드 -->
+        <div id="subViewEquipMaster" class="space-y-3">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <input type="text" id="masterEquipSearchInput" placeholder="설비코드/관리번호/위치 검색..." class="w-full sm:w-64 p-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-semibold focus:outline-none">
+            <button id="btnOpenNewEquipModal" class="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-md shadow-rose-200 flex items-center gap-1">
+              <i class="fa-solid fa-plus"></i>
+              <span>신규 설비 등록</span>
+            </button>
+          </div>
+          <div class="overflow-x-auto border border-slate-200 rounded-xl custom-scrollbar max-h-[500px]">
+            <table class="w-full text-left text-xs divide-y divide-slate-200">
+              <thead class="bg-slate-50 font-bold text-slate-600 sticky top-0 z-10">
+                <tr>
+                  <th class="p-2.5">QR코드</th>
+                  <th class="p-2.5">관리번호</th>
+                  <th class="p-2.5">명칭 / 종류</th>
+                  <th class="p-2.5">위치 정보</th>
+                  <th class="p-2.5">약제/용량</th>
+                  <th class="p-2.5">기한</th>
+                  <th class="p-2.5">My Area</th>
+                  <th class="p-2.5 text-center">관리</th>
+                </tr>
+              </thead>
+              <tbody id="masterEquipTableBody" class="divide-y divide-slate-100 font-medium"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 5-2. Zone / 부서 매핑 뷰 -->
+        <div id="subViewZoneMaster" class="hidden space-y-3">
+          <p class="text-xs text-slate-500 font-semibold">각 세부 룸(Zone)별로 점검 책임을 맡길 담당 부서를 지정합니다.</p>
+          <div class="overflow-x-auto border border-slate-200 rounded-xl custom-scrollbar max-h-[500px]">
+            <table class="w-full text-left text-xs divide-y divide-slate-200">
+              <thead class="bg-slate-50 font-bold text-slate-600 sticky top-0 z-10">
+                <tr>
+                  <th class="p-2.5">Zone 코드</th>
+                  <th class="p-2.5">위치명</th>
+                  <th class="p-2.5">사업장 / 층수</th>
+                  <th class="p-2.5">담당 부서 (Responsible Dept)</th>
+                  <th class="p-2.5 text-center">수정</th>
+                </tr>
+              </thead>
+              <tbody id="masterZoneTableBody" class="divide-y divide-slate-100 font-medium"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 5-3. 점검표 템플릿 관리 뷰 -->
+        <div id="subViewTplMaster" class="hidden space-y-3">
+          <p class="text-xs text-slate-500 font-semibold">시스템에 등록된 점검표 템플릿 항목들을 열람 및 관리합니다.</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="masterTplContainer"></div>
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <!-- ==================== 동적 점검표 모달 ==================== -->
+  <div id="inspectionModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh] sm:max-h-[88vh] safe-bottom">
+      
+      <!-- 상단 드래그 인디케이터 (모바일 전용) -->
+      <div class="w-12 h-1 bg-slate-300 rounded-full mx-auto mt-2.5 sm:hidden"></div>
+
+      <div class="px-4 py-3 sm:p-4 border-b border-slate-200/90 flex items-center justify-between bg-slate-50 shrink-0">
+        <div class="min-w-0 pr-2">
+          <div class="flex items-center gap-1.5">
+            <span id="modalCategoryBadge" class="text-[10px] sm:text-[11px] font-bold text-rose-600 uppercase tracking-wider bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full">점검표</span>
+            <span id="modalModeBadge" class="text-[10px] sm:text-[11px] font-semibold text-slate-500 truncate">시설장비</span>
+          </div>
+          <h3 id="modalTargetTitle" class="text-sm sm:text-base font-extrabold text-slate-900 leading-tight mt-0.5 truncate">상세 점검표</h3>
+          <p id="modalTargetSub" class="text-[11px] text-slate-500 font-medium truncate"></p>
+        </div>
+        <button id="btnCloseInspectionModal" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-xmark text-sm sm:text-base"></i>
+        </button>
+      </div>
+
+      <div class="p-3.5 sm:p-4 overflow-y-auto space-y-3.5 custom-scrollbar text-xs flex-1">
+        <div class="border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
+          <div class="bg-slate-100/90 px-3 py-2 font-bold text-slate-700 border-b border-slate-200 flex justify-between items-center text-[11px] sm:text-xs">
+            <span id="modalChecklistTitle">체크리스트 점검 항목</span>
+            <span class="text-[10px] text-slate-400 font-normal">O(양호) △(검토) X(불량)</span>
+          </div>
+          <div class="divide-y divide-slate-100" id="modalChecklistRowsContainer"></div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1 flex items-center justify-between text-[11px] sm:text-xs">
+            <span>특이사항 메모</span>
+            <span class="text-[10px] text-slate-400 font-normal">※ 이상 사유 및 조치사항</span>
+          </label>
+          <div class="flex flex-wrap gap-1 mb-2" id="modalQuickNotesContainer"></div>
+          <textarea id="modalNoteInput" rows="2" placeholder="기타 특이사항을 입력하세요..." 
+            class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-rose-500 focus:outline-none"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-0.5">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[11px]">점검자 성명 / 사번</label>
+            <input type="text" id="modalInspectorInput" value="담당자" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-rose-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[11px]">점검일시</label>
+            <input type="date" id="modalDateInput" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-rose-500">
+          </div>
+        </div>
+      </div>
+
+      <div class="p-3 sm:p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between shrink-0 gap-2">
+        <button type="button" id="btnResetModalRecord" class="px-2.5 sm:px-3 py-2 text-rose-600 hover:bg-rose-50 rounded-xl font-bold text-xs transition-colors shrink-0">
+          <i class="fa-solid fa-rotate-left mr-1"></i> 점검 취소
+        </button>
+        <div class="flex items-center space-x-1.5 sm:space-x-2">
+          <button type="button" id="btnCancelModal" class="px-3.5 sm:px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-200 rounded-xl">닫기</button>
+          <button type="button" id="btnSaveModal" class="px-4 sm:px-5 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-md shadow-rose-200 min-h-[38px] flex items-center justify-center">저장 완료</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 관리자 비밀번호 인증 모달 ==================== -->
+  <div id="adminPinModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xs w-full p-5 shadow-2xl text-center space-y-4">
+      <div class="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center mx-auto text-xl">
+        <i class="fa-solid fa-key"></i>
+      </div>
+      <div>
+        <h4 class="text-base font-extrabold text-slate-900">관리자 인증</h4>
+        <p class="text-xs text-slate-500 mt-1">기준정보 관리를 위해 비밀번호를 입력하세요.</p>
+      </div>
+      <div>
+        <input type="password" id="adminPinInput" maxlength="6" placeholder="비밀번호 (3333)" 
+          class="w-full text-center text-lg tracking-widest font-mono p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
+        <p id="adminPinError" class="text-[11px] text-rose-600 font-bold mt-1.5 hidden">비밀번호가 일치하지 않습니다.</p>
+      </div>
+      <div class="grid grid-cols-2 gap-2 pt-1">
+        <button id="btnCancelAdminPin" class="py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl">취소</button>
+        <button id="btnConfirmAdminPin" class="py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-md shadow-rose-200">인증 확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 토스트 알림창 -->
+  <div id="toastNotification" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-slate-900/90 text-white text-xs px-4 py-2.5 rounded-xl shadow-lg flex items-center space-x-2 transition-all opacity-0 pointer-events-none duration-300">
+    <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
+    <span id="toastMessage">완료되었습니다.</span>
+  </div>
+
+  <script>
+    // 점검표 템플릿 마스터
+    const TEMPLATES_MASTER = [
+      {
+        id: "TPL_FIRE_EXT",
+        name: "소화기 점검표 (소방청 표준 7항목)",
+        category: "소화기",
+        items: [
+          { id: "FE_1", title: "거주자 등이 손쉽게 사용할 수 있는 장소에 설치되어 있는지 여부" },
+          { id: "FE_2", title: "구획된 거실(바닥면적 33㎡ 이상) 마다 소화기 설치 여부" },
+          { id: "FE_3", title: "소화기 표지 설치 여부" },
+          { id: "FE_4", title: "소화기의 변형ㆍ손상 또는 부식이 있는지 여부" },
+          { id: "FE_5", title: "지시압력계(녹색범위)의 적정 여부" },
+          { id: "FE_6", title: "수동식 분말소화기 내용연수(10년) 적정 여부" },
+          { id: "FE_7", title: "기타 외관 특이사항 여부" }
+        ],
+        quickNotes: ["게이지 경계", "소화기 보관함 파손", "위치 가려짐(정제기 뒤)", "표지 노후", "비상망치 고정 불량"]
+      },
+      {
+        id: "TPL_HYDRANT",
+        name: "소화전 점검표 (옥내/상수도 5항목)",
+        category: "소화전",
+        items: [
+          { id: "HY_1", title: "소화전함 전면 적재물 유무 및 개폐 방해요소 없음" },
+          { id: "HY_2", title: "호스 및 노즐 결합 상태 및 노후/파손 여부" },
+          { id: "HY_3", title: "소화전 개폐 밸브 누수 및 고착 여부" },
+          { id: "HY_4", title: "위치표시등 점등 및 사용설명서 부착 상태" },
+          { id: "HY_5", title: "소화전함 내 방수구 규격 및 청결 상태" }
+        ],
+        quickNotes: ["표시등 소등", "호스 결속 불량", "개폐 밸브 미세누수", "전면 물품 적치"]
+      },
+      {
+        id: "TPL_AREA_CLEAN",
+        name: "MY AREA 순찰 점검표 (클린룸/생산 구역)",
+        category: "구역순찰",
+        items: [
+          { id: "AC_1", title: "비상탈출로 및 스막룸 피난경로 장애물 적치 여부" },
+          { id: "AC_2", title: "방화셔터 및 방화문 연동선 상의 간섭 물품 없음" },
+          { id: "AC_3", title: "유해화학물질 취급부스 국소배기 및 소방설비 상태" },
+          { id: "AC_4", title: "정전기 접지선 및 정전화 테스터 가동 상태" }
+        ],
+        quickNotes: ["방화셔터 하부 적재물", "비상구 식별 불량", "스막룸 복도 카트 방치"]
+      },
+      {
+        id: "TPL_AREA_UTIL",
+        name: "MY AREA 순찰 점검표 (유틸리티/고위험 구역)",
+        category: "구역순찰",
+        items: [
+          { id: "AU_1", title: "변전/기계/발전기실 가스계 소화설비 수동조작함 상태" },
+          { id: "AU_2", title: "오일/연료/화학물질 누유·누출 여부 및 흡착포 비치" },
+          { id: "AU_3", title: "옥외 위험물·LPG·수소 저장소 접지 및 경고표지" },
+          { id: "AU_4", title: "방화구획 틈새 방화충전재 밀폐 상태" }
+        ],
+        quickNotes: ["오일 미세누유 흔적", "가스감지기 경고", "방화구획 배관 틈새 보수요함"]
+      },
+      {
+        id: "TPL_AREA_OFFICE",
+        name: "MY AREA 순찰 점검표 (사무/복지/공용 구역)",
+        category: "구역순찰",
+        items: [
+          { id: "AO_1", title: "복도 및 주계단실 방화문 상시 닫힘 상태 유지" },
+          { id: "AO_2", title: "피난유도등 정상 점등 및 유도선 훼손 유무" },
+          { id: "AO_3", title: "개인 전열기구(히터/방석 등) 무단 사용 유무" },
+          { id: "AO_4", title: "탕비실/식당 조리구역 가스차단기 및 K급 소화설비" }
+        ],
+        quickNotes: ["방화문 고임목 제거조치", "유도등 소등", "임의 멀티탭 과부하 연결"]
+      },
+      {
+        id: "TPL_ZONE_DAILY",
+        name: "MY ZONE 부서 자율 화재예방 점검표",
+        category: "부서자율",
+        items: [
+          { id: "ZD_1", title: "소화기 전면 1m 이내 물품 적치 금지 준수" },
+          { id: "ZD_2", title: "퇴근 전 미사용 전기/설비 플러그 차단 상태" },
+          { id: "ZD_3", title: "가연성 폐기물 쓰레기통 일일 비움 여부" },
+          { id: "ZD_4", title: "비상탈출구 시건장치 해제 및 시야 확보" }
+        ],
+        quickNotes: ["소화기 앞 박스 적치 치움", "퇴근 미차단 콘센트 조치"]
+      }
+    ];
+
+    // MY AREA 마스터 정의
+    const AREAS_MASTER = [
+      { id: "A00", name: "유틸리티 & 옥외", tplId: "TPL_AREA_UTIL", desc: "기계실, 변전실, 발전기실, 옥외 가스/폐기물" },
+      { id: "A01", name: "1층 GSS 크린룸", tplId: "TPL_AREA_CLEAN", desc: "GSS 크린룸, 용접실, 최종검사실" },
+      { id: "A02", name: "1층 출하 & 창고", tplId: "TPL_AREA_CLEAN", desc: "출하장, 반출입도크, 자재/소모품 창고" },
+      { id: "A03", name: "1층 ENC & 협력사", tplId: "TPL_AREA_CLEAN", desc: "1층 ENC크린룸, 협력사 벤더룸" },
+      { id: "A04", name: "1층 GPU 제조", tplId: "TPL_AREA_CLEAN", desc: "GPU룸, 테스트실, 품질분석실" },
+      { id: "A05", name: "사무 & 복지공용", tplId: "TPL_AREA_OFFICE", desc: "주차장, 로비, 2~4층 사무실, 식당/카페" },
+      { id: "A06", name: "지하 ENC & 창고", tplId: "TPL_AREA_CLEAN", desc: "지하 크린룸, 자산창고, 제품창고" },
+      { id: "RA00", name: "진위연구소 전체", tplId: "TPL_AREA_UTIL", desc: "연구실, 유해물질부스, 가스실, 정밀측정실" }
+    ];
+
+    // 120여 건 실제 소화기 및 시설장비 데이터셋
+    const RAW_EQUIP_DATA = [
+      { code: "WH01B0101F5FE101", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0101] 지하 크린룸", equipCode: "F5FE1", no: "01", name: "분말 소화기", detailLoc: "EnC크린룸 앞 복도", agent: "제1인산암모늄", amount: "3.3kg", expire: "2030.01.", area: "A06", mgmtNo: "A06-21" },
+      { code: "WH01B0101F5FE102", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0101] 지하 크린룸", equipCode: "F5FE1", no: "02", name: "분말 소화기", detailLoc: "지하 ENC크린룸 내 자동셔터 측", agent: "제1인산암모늄", amount: "3.3kg", expire: "2031.11.", area: "A06", mgmtNo: "A06-09" },
+      { code: "WH01B0101F5FE201", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0101] 지하 크린룸", equipCode: "F5FE2", no: "01", name: "청정 소화기", detailLoc: "EnC크린룸 내 스막 출입구 측", agent: "HCFC-123", amount: "2.5kg", expire: "2030.09.", area: "A06", mgmtNo: "A06-02" },
+      { code: "WH01B0101F5FE202", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0101] 지하 크린룸", equipCode: "F5FE2", no: "02", name: "청정 소화기", detailLoc: "EnC크린룸 내 중앙 기둥 측", agent: "HCFC-123", amount: "2.5kg", expire: "2030.09.", area: "A06", mgmtNo: "A06-03" },
+      { code: "WH01B0101F5FE203", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0101] 지하 크린룸", equipCode: "F5FE2", no: "03", name: "청정 소화기", detailLoc: "EnC크린룸 내 뒤편 1", agent: "HCFC-123", amount: "2.5kg", expire: "2030.09.", area: "A06", mgmtNo: "A06-04" },
+      { code: "WH01B0101F5FE204", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0101] 지하 크린룸", equipCode: "F5FE2", no: "04", name: "청정 소화기", detailLoc: "EnC크린룸 내 뒤편 2", agent: "HCFC-123", amount: "2.5kg", expire: "2030.09.", area: "A06", mgmtNo: "A06-05" },
+      { code: "WH01B0101F5FE205", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0101] 지하 크린룸", equipCode: "F5FE2", no: "05", name: "청정 소화기", detailLoc: "EnC크린룸 내 좌측 뒤편", agent: "HCFC-123", amount: "2.5kg", expire: "2030.09.", area: "A06", mgmtNo: "A06-06" },
+      { code: "WH01B0101F5FE206", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0101] 지하 크린룸", equipCode: "F5FE2", no: "06", name: "청정 소화기", detailLoc: "EnC크린룸 내 자동셔터 출입구 측 1", agent: "HCFC-123", amount: "2.5kg", expire: "2030.09.", area: "A06", mgmtNo: "A06-07" },
+      { code: "WH01B0101F5FE207", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0101] 지하 크린룸", equipCode: "F5FE2", no: "07", name: "청정 소화기", detailLoc: "EnC크린룸 내 자동셔터 출입구 측 2", agent: "HFC-236FA", amount: "3kg", expire: "2034.10.", area: "A06", mgmtNo: "A06-08" },
+      { code: "WH01B0101F5FE208", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0101] 지하 크린룸", equipCode: "F5FE2", no: "08", name: "청정 소화기", detailLoc: "EnC크린룸 내 출입구 측 1", agent: "HCFC-123", amount: "2.5kg", expire: "2030.09.", area: "A06", mgmtNo: "A06-10" },
+      { code: "WH01B0101F5FE209", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0101] 지하 크린룸", equipCode: "F5FE2", no: "09", name: "청정 소화기", detailLoc: "EnC크린룸 내 출입구 측 2", agent: "HCFC-123", amount: "2.5kg", expire: "2030.09.", area: "A06", mgmtNo: "A06-11" },
+      { code: "WH01B0102F5FE201", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0102] 지하 크린룸 전실", equipCode: "F5FE2", no: "01", name: "청정 소화기", detailLoc: "EnC 스막룸 내", agent: "HCFC-123", amount: "2.5kg", expire: "2030.09.", area: "A06", mgmtNo: "A06-01" },
+      { code: "WH01B0104F5FE101", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0104] 지하 자산창고", equipCode: "F5FE1", no: "01", name: "분말 소화기", detailLoc: "EnC 자산창고 내", agent: "제1인산암모늄", amount: "3.3kg", expire: "2030.01.", area: "A06", mgmtNo: "A06-12" },
+      { code: "WH01B0105F5FE201", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0105] 지하 ENC창고", equipCode: "F5FE2", no: "01", name: "청정 소화기", detailLoc: "EnC 창고 내", agent: "HFC-236FA", amount: "3kg", expire: "2034.10.", area: "A06", mgmtNo: "A06-13" },
+      { code: "WH01B0106F5FE101", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0106] 지하 제품창고", equipCode: "F5FE1", no: "01", name: "분말 소화기", detailLoc: "협력사사무실 내 1", agent: "제1인산암모늄", amount: "3.3kg", expire: "2030.01.", area: "A06", mgmtNo: "A06-14" },
+      { code: "WH01B0106F5FE102", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0106] 지하 제품창고", equipCode: "F5FE1", no: "02", name: "분말 소화기", detailLoc: "협력사사무실 내 2", agent: "제1인산암모늄", amount: "3.3kg", expire: "2030.01.", area: "A06", mgmtNo: "A06-15" },
+      { code: "WH01B0107F5FE101", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0107] 지하 일반창고", equipCode: "F5FE1", no: "01", name: "분말 소화기", detailLoc: "일반창고 내", agent: "제1인산암모늄", amount: "3.3kg", expire: "2030.01.", area: "A06", mgmtNo: "A06-18" },
+      { code: "WH01B0108F5FE201", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0108] 지하 컨트롤룸", equipCode: "F5FE2", no: "01", name: "청정 소화기", detailLoc: "컨트롤룸 내", agent: "HFC-236FA", amount: "3kg", expire: "2031.04.", area: "A06", mgmtNo: "A06-22" },
+      { code: "WH01B0109F5FE101", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0109] 지하 기계실", equipCode: "F5FE1", no: "01", name: "분말 소화기", detailLoc: "기계실 내 보일러 앞", agent: "제1인산암모늄", amount: "3.3kg", expire: "2034.02.", area: "A00", mgmtNo: "A00-04" },
+      { code: "WH01B0109F5FE102", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0109] 지하 기계실", equipCode: "F5FE1", no: "02", name: "분말 소화기", detailLoc: "기계실 출입구 계단 측", agent: "제1인산암모늄", amount: "3.3kg", expire: "2034.02.", area: "A00", mgmtNo: "A00-02" },
+      { code: "WH01B0109F5FE103", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0109] 지하 기계실", equipCode: "F5FE1", no: "03", name: "분말 소화기", detailLoc: "기계실 내 진공펌프 측", agent: "제1인산암모늄", amount: "3.3kg", expire: "2034.02.", area: "A00", mgmtNo: "A00-05" },
+      { code: "WH01B0109F5FE201", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0109] 지하 기계실", equipCode: "F5FE2", no: "01", name: "청정 소화기", detailLoc: "기계실 내 배수펌프 측", agent: "HCFC-123", amount: "2.5kg", expire: "2030.09.", area: "A00", mgmtNo: "A00-06" },
+      { code: "WH01B0109F5FE202", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0109] 지하 기계실", equipCode: "F5FE2", no: "02", name: "청정 소화기", detailLoc: "기계실 내 저수조 앞", agent: "HCFC-123", amount: "2.5kg", expire: "2030.09.", area: "A00", mgmtNo: "A00-03" },
+      { code: "WH01B0109F5FE203", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0109] 지하 기계실", equipCode: "F5FE2", no: "03", name: "청정 소화기", detailLoc: "기계실 내 폐수저장실", agent: "HCFC-123", amount: "2.5kg", expire: "2030.09.", area: "A00", mgmtNo: "A00-01" },
+      { code: "WH01B0110F5FE201", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0110] 지하 변전실", equipCode: "F5FE2", no: "01", name: "청정 소화기", detailLoc: "변전실 내 1", agent: "HCFC-123", amount: "2.5kg", expire: "2030.09.", area: "A00", mgmtNo: "A00-07" },
+      { code: "WH01B0110F5FE202", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0110] 지하 변전실", equipCode: "F5FE2", no: "02", name: "청정 소화기", detailLoc: "변전실 내 2", agent: "HCFC-123", amount: "2.5kg", expire: "2030.09.", area: "A00", mgmtNo: "A00-08" },
+      { code: "WH01B0110F5FE203", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0110] 지하 변전실", equipCode: "F5FE2", no: "03", name: "청정 소화기", detailLoc: "변전실 내 3", agent: "HFC-236FA", amount: "3kg", expire: "2031.04.", area: "A00", mgmtNo: "A00-09" },
+      { code: "WH01B0110F5FE204", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0110] 지하 변전실", equipCode: "F5FE2", no: "04", name: "청정 소화기", detailLoc: "변전실 내 4", agent: "HFC-236FA", amount: "3kg", expire: "2031.04.", area: "A00", mgmtNo: "A00-10" },
+      { code: "WH01B0110F5FE205", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0110] 지하 변전실", equipCode: "F5FE2", no: "05", name: "청정 소화기", detailLoc: "변전실 내 발전기실 측 1", agent: "HFC-236FA", amount: "3kg", expire: "2031.04.", area: "A00", mgmtNo: "A00-11" },
+      { code: "WH01B0110F5FE206", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0110] 지하 변전실", equipCode: "F5FE2", no: "06", name: "청정 소화기", detailLoc: "변전실 내 발전기실 측 2", agent: "HFC-236FA", amount: "3kg", expire: "2031.04.", area: "A00", mgmtNo: "A00-12" },
+      { code: "WH01B0111F5FE201", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0111] 지하 발전기실", equipCode: "F5FE2", no: "01", name: "청정 소화기", detailLoc: "발전기실 내 1", agent: "HCFC-123", amount: "2.5kg", expire: "2030.09.", area: "A00", mgmtNo: "A00-13" },
+      { code: "WH01B0111F5FE202", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0111] 지하 발전기실", equipCode: "F5FE2", no: "02", name: "청정 소화기", detailLoc: "발전기실 내 2", agent: "HCFC-123", amount: "2.5kg", expire: "2030.09.", area: "A00", mgmtNo: "A00-14" },
+      { code: "WH01B0112F5FE101", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0112] 지하 주차장", equipCode: "F5FE1", no: "01", name: "분말 소화기", detailLoc: "주차장 입구(방화셔터 앞)", agent: "제1인산암모늄", amount: "3.3kg", expire: "2030.01.", area: "A05", mgmtNo: "A05-02" },
+      { code: "WH01B0112F5FE102", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0112] 지하 주차장", equipCode: "F5FE1", no: "02", name: "분말 소화기", detailLoc: "주차장 B5기둥", agent: "제1인산암모늄", amount: "3.3kg", expire: "2030.01.", area: "A05", mgmtNo: "A05-22" },
+      { code: "WH01B0112F5FE108", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0112] 지하 주차장", equipCode: "F5FE1", no: "08", name: "분말 소화기", detailLoc: "주차장 D10기둥", agent: "제1인산암모늄", amount: "3.3kg", expire: "2030.01.", area: "A05", mgmtNo: "A05-15" },
+      { code: "WH01F0111F5FE201", facility: "[WH01] 진위사업장", floor: "1F", room: "[F0111] 1층 GSS크린룸", equipCode: "F5FE2", no: "01", name: "청정 소화기", detailLoc: "GSS 에어샤워 앞", agent: "HCFC-123", amount: "2.5kg", expire: "2030.09.", area: "A01", mgmtNo: "A01-05" },
+      { code: "WH01F0119F5FE204", facility: "[WH01] 진위사업장", floor: "1F", room: "[F0119] 1층 GPU룸", equipCode: "F5FE2", no: "04", name: "청정 소화기", detailLoc: "GPU 중앙 뒤편", agent: "HCFC-123", amount: "2.5kg", expire: "2030.09.", area: "A04", mgmtNo: "A04-10" },
+      { code: "WH01F0123F5FE201", facility: "[WH01] 진위사업장", floor: "1F", room: "[F0123] 1층 ENC크린룸", equipCode: "F5FE2", no: "01", name: "청정 소화기", detailLoc: "ENC크린룸 출입구 측", agent: "HCFC-123", amount: "2.5kg", expire: "2030.09.", area: "A03", mgmtNo: "A03-05" },
+      { code: "WH01F0312F5FE101", facility: "[WH01] 진위사업장", floor: "3F", room: "[F0312] 3층 OFFICE", equipCode: "F5FE1", no: "01", name: "분말 소화기", detailLoc: "사무실 중앙통로", agent: "제1인산암모늄", amount: "3.3kg", expire: "2030.01.", area: "A05", mgmtNo: "A05-55" },
+      { code: "WH01S0101F5FE201", facility: "[WH01] 진위사업장", floor: "옥외", room: "[S0101] 보안실", equipCode: "F5FE2", no: "01", name: "청정 소화기", detailLoc: "보안실 입구", agent: "HCFC-123", amount: "2.5kg", expire: "2035.01.", area: "A00", mgmtNo: "A00-15" },
+      { code: "WH02F0101F5FE101", facility: "[WH02] 진위연구소", floor: "1F", room: "[F0101] 연구소 1층", equipCode: "F5FE1", no: "01", name: "분말 소화기", detailLoc: "연구실 전실", agent: "제1인산암모늄", amount: "3.3kg", expire: "2034.02.", area: "RA00", mgmtNo: "RA00-03" },
+      { code: "WH02F0101F5FE401", facility: "[WH02] 진위연구소", floor: "1F", room: "[F0101] 연구소 1층", equipCode: "F5FE4", no: "01", name: "금속 소화기", detailLoc: "연구실 내 (마이소프트젤)", agent: "메토버", amount: "2.7kg", expire: "2030.12.", area: "RA00", mgmtNo: "RA00-15" },
+      { code: "WH02F0201F5FE201", facility: "[WH02] 진위연구소", floor: "2F", room: "[F0201] 연구소 2층", equipCode: "F5FE2", no: "01", name: "청정 소화기", detailLoc: "사무실 창가", agent: "HCFC-123", amount: "3kg", expire: "2028.11.", area: "RA00", mgmtNo: "RA00-34" }
+    ];
+
+    // MY ZONE 부서 매핑 마스터
+    const DEFAULT_ZONES = [
+      { id: "ZONE_B0101", name: "지하 크린룸", facility: "[WH01] 진위사업장", floor: "B1F", dept: "제조기술1팀" },
+      { id: "ZONE_B0109", name: "지하 기계/변전실", facility: "[WH01] 진위사업장", floor: "B1F", dept: "시설환경팀" },
+      { id: "ZONE_B0112", name: "지하 주차장", facility: "[WH01] 진위사업장", floor: "B1F", dept: "총무팀" },
+      { id: "ZONE_F0111", name: "1층 GSS 크린룸", facility: "[WH01] 진위사업장", floor: "1F", dept: "제조기술2팀" },
+      { id: "ZONE_F0116", name: "1층 출하장/도크", facility: "[WH01] 진위사업장", floor: "1F", dept: "물류운영팀" },
+      { id: "ZONE_F0119", name: "1층 GPU룸", facility: "[WH01] 진위사업장", floor: "1F", dept: "GPU공정팀" },
+      { id: "ZONE_F0123", name: "1층 ENC 크린룸", facility: "[WH01] 진위사업장", floor: "1F", dept: "제조기술1팀" },
+      { id: "ZONE_F0312", name: "3층 OFFICE 본사", facility: "[WH01] 진위사업장", floor: "3F", dept: "경영지원팀" },
+      { id: "ZONE_F0411", name: "4층 구내식당/카페", facility: "[WH01] 진위사업장", floor: "4F", dept: "총무복지팀" },
+      { id: "ZONE_R0101", name: "진위연구소 실험동", facility: "[WH02] 진위연구소", floor: "1F", dept: "선행연구팀" }
+    ];
+
+    let currentMode = "equip"; // equip, area, zone, history, master
+    let isMasterUnlocked = false;
+    let selectedArea = "";
+    let selectedDept = "";
+    
+    // 점검 레코드 스토리지 로드
+    let inspectionRecords = {};
+    try {
+      const saved = localStorage.getItem("SAFETYCHECK_RECORDS_V3");
+      if (saved) inspectionRecords = JSON.parse(saved);
+    } catch(e) {
+      inspectionRecords = {};
+    }
+
+    // 설비 마스터 로드
+    let equipMasterList = [];
+    try {
+      const savedEquips = localStorage.getItem("SAFETYCHECK_EQUIPS_V3");
+      if (savedEquips) equipMasterList = JSON.parse(savedEquips);
+      else equipMasterList = RAW_EQUIP_DATA.map(item => ({ ...item, templateId: "TPL_FIRE_EXT" }));
+    } catch(e) {
+      equipMasterList = RAW_EQUIP_DATA.map(item => ({ ...item, templateId: "TPL_FIRE_EXT" }));
+    }
+
+    // Zone 부서 매핑 로드
+    let zoneMasterList = [];
+    try {
+      const savedZones = localStorage.getItem("SAFETYCHECK_ZONES_V3");
+      if (savedZones) zoneMasterList = JSON.parse(savedZones);
+      else zoneMasterList = DEFAULT_ZONES;
+    } catch(e) {
+      zoneMasterList = DEFAULT_ZONES;
+    }
+
+    // 설비 기준정보(equipMasterList)로부터 MY ZONE(세부 룸 단위 및 부서)과 MY AREA를 자동 산입/동기화하는 함수
+    function deriveZonesAndAreasFromEquips() {
+      if (!Array.isArray(equipMasterList) || equipMasterList.length === 0) return;
+
+      const roomMap = new Map();
+      equipMasterList.forEach(e => {
+        if (!e.room) return;
+        const roomKey = e.room.trim();
+        if (!roomMap.has(roomKey)) {
+          // 부서 추론 (e.dept 지정값 우선, 부재 시 룸 명칭 키워드 기반 기본 배정)
+          let dept = e.dept;
+          if (!dept) {
+            const rLow = roomKey.toLowerCase();
+            if (rLow.includes("크린룸") || rLow.includes("용접") || rLow.includes("검사") || rLow.includes("pa룸")) dept = "제조기술1팀";
+            else if (rLow.includes("기계") || rLow.includes("변전") || rLow.includes("발전") || rLow.includes("공조")) dept = "시설환경팀";
+            else if (rLow.includes("주차장") || rLow.includes("보안") || rLow.includes("흡연") || rLow.includes("복도") || rLow.includes("로비")) dept = "총무팀";
+            else if (rLow.includes("식당") || rLow.includes("주방") || rLow.includes("휴게") || rLow.includes("피트니스") || rLow.includes("카페")) dept = "총무복지팀";
+            else if (rLow.includes("office") || rLow.includes("회의") || rLow.includes("대표") || rLow.includes("임원")) dept = "경영지원팀";
+            else if (rLow.includes("창고") || rLow.includes("출하") || rLow.includes("반출입") || rLow.includes("도크")) dept = "물류운영팀";
+            else if (rLow.includes("연구") || rLow.includes("분석") || rLow.includes("실험")) dept = "선행연구팀";
+            else if (rLow.includes("gpu")) dept = "GPU공정팀";
+            else dept = "안전관리팀";
+          }
+          roomMap.set(roomKey, {
+            id: "ZONE_" + roomKey.replace(/[^a-zA-Z0-9가-힣]/g, "_").slice(0, 24),
+            name: roomKey,
+            facility: e.facility || "[WH01] 진위사업장",
+            floor: e.floor || "1F",
+            dept: dept
+          });
+        }
+      });
+
+      // 기존 수동 편집된 부서 지정 정보가 있으면 보존 병합
+      if (Array.isArray(zoneMasterList) && zoneMasterList.length > 0) {
+        zoneMasterList.forEach(existingZone => {
+          if (roomMap.has(existingZone.name)) {
+            const target = roomMap.get(existingZone.name);
+            target.dept = existingZone.dept || target.dept;
+            target.id = existingZone.id || target.id;
+          }
+        });
+      }
+
+      zoneMasterList = Array.from(roomMap.values());
+      try {
+        localStorage.setItem("SAFETYCHECK_ZONES_V3", JSON.stringify(zoneMasterList));
+      } catch (err) {
+        console.warn("Zone master storage failed", err);
+      }
+    }
+
+    function saveRecords() {
+      try {
+        localStorage.setItem("SAFETYCHECK_RECORDS_V3", JSON.stringify(inspectionRecords));
+      } catch(e) {
+        console.error("Storage save failed", e);
+      }
+      updateStatusMetrics();
+    }
+
+    function saveEquipMaster() {
+      try {
+        localStorage.setItem("SAFETYCHECK_EQUIPS_V3", JSON.stringify(equipMasterList));
+      } catch(e) {
+        console.error("Equip master save failed", e);
+      }
+    }
+
+    function showToast(message, isSuccess = true) {
+      const toast = document.getElementById("toastNotification");
+      const msgElem = document.getElementById("toastMessage");
+      const iconElem = document.getElementById("toastIcon");
+
+      msgElem.textContent = message;
+      if (isSuccess) {
+        iconElem.className = "fa-solid fa-circle-check text-emerald-400";
+      } else {
+        iconElem.className = "fa-solid fa-triangle-exclamation text-rose-400";
+      }
+
+      toast.classList.remove("opacity-0", "pointer-events-none");
+      toast.classList.add("opacity-100");
+      setTimeout(() => {
+        toast.classList.remove("opacity-100");
+        toast.classList.add("opacity-0", "pointer-events-none");
+      }, 2300);
+    }
+
+    // 모달 활성 데이터
+    let activeModal = {
+      mode: "", // EQUIP, AREA, ZONE
+      targetId: "",
+      title: "",
+      sub: "",
+      tpl: null,
+      checks: {},
+      note: "",
+      inspector: "담당자",
+      date: new Date().toISOString().split("T")[0]
+    };
+
+    function openInspectionModal(mode, targetId, title, sub, tplId) {
+      const modal = document.getElementById("inspectionModal");
+      const tpl = TEMPLATES_MASTER.find(t => t.id === tplId) || TEMPLATES_MASTER[0];
+      
+      const recordKey = `${mode}_${targetId}`;
+      const existing = inspectionRecords[recordKey] || null;
+
+      activeModal.mode = mode;
+      activeModal.targetId = targetId;
+      activeModal.title = title;
+      activeModal.sub = sub;
+      activeModal.tpl = tpl;
+      activeModal.checks = {};
+
+      tpl.items.forEach(item => {
+        activeModal.checks[item.id] = existing?.checks?.[item.id] || "O";
+      });
+
+      activeModal.note = existing?.note || "";
+      activeModal.inspector = existing?.inspector || "담당자";
+      activeModal.date = existing?.date || new Date().toISOString().split("T")[0];
+
+      document.getElementById("modalTargetTitle").textContent = title;
+      document.getElementById("modalTargetSub").textContent = sub;
+      document.getElementById("modalCategoryBadge").textContent = tpl.category || "점검표";
+      document.getElementById("modalModeBadge").textContent = mode === "EQUIP" ? "1. 시설장비" : (mode === "AREA" ? "2. MY AREA" : "3. MY ZONE");
+      document.getElementById("modalChecklistTitle").textContent = tpl.name;
+      document.getElementById("modalNoteInput").value = activeModal.note;
+      document.getElementById("modalInspectorInput").value = activeModal.inspector;
+      document.getElementById("modalDateInput").value = activeModal.date;
+
+      // 빠른 메모 칩
+      const notesContainer = document.getElementById("modalQuickNotesContainer");
+      notesContainer.innerHTML = (tpl.quickNotes || []).map(text => `
+        <button type="button" class="btn-quick-note text-[10px] px-2 py-0.5 rounded-md font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200" data-text="${text}">
+          + ${text}
+        </button>
+      `).join('');
+
+      notesContainer.querySelectorAll(".btn-quick-note").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const t = btn.getAttribute("data-text");
+          const input = document.getElementById("modalNoteInput");
+          input.value = input.value ? `${input.value}, ${t}` : t;
+        });
+      });
+
+      renderModalChecklistRows();
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeInspectionModal() {
+      const modal = document.getElementById("inspectionModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    function renderModalChecklistRows() {
+      const container = document.getElementById("modalChecklistRowsContainer");
+      if (!activeModal.tpl) return;
+
+      container.innerHTML = activeModal.tpl.items.map((item, idx) => {
+        const currentVal = activeModal.checks[item.id] || "O";
+        const isPass = currentVal === "O";
+        const isWarn = currentVal === "△";
+        const isFail = currentVal === "X";
+
+        return `
+          <div class="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-50/80 transition-colors">
+            <div class="space-y-0.5 flex-1 pr-1">
+              <span class="font-bold text-slate-800 flex items-start gap-1.5 leading-snug text-xs sm:text-[13px]">
+                <span class="text-slate-400 font-mono text-[11px] mt-0.5 shrink-0">${idx + 1}.</span>
+                <span>${item.title}</span>
+              </span>
+            </div>
+            <div class="grid grid-cols-3 sm:flex items-center gap-1 shrink-0 w-full sm:w-auto pt-1 sm:pt-0">
+              <button type="button" class="chk-status-btn py-1.5 sm:py-1 px-2 text-xs font-bold rounded-lg border transition-all text-center ${isPass ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'}" data-item-id="${item.id}" data-val="O">
+                O 양호
+              </button>
+              <button type="button" class="chk-status-btn py-1.5 sm:py-1 px-2 text-xs font-bold rounded-lg border transition-all text-center ${isWarn ? 'bg-amber-500 text-white border-amber-500 shadow-2xs' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'}" data-item-id="${item.id}" data-val="△">
+                △ 검토
+              </button>
+              <button type="button" class="chk-status-btn py-1.5 sm:py-1 px-2 text-xs font-bold rounded-lg border transition-all text-center ${isFail ? 'bg-rose-600 text-white border-rose-600 shadow-2xs' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'}" data-item-id="${item.id}" data-val="X">
+                X 불량
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.querySelectorAll(".chk-status-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const itemId = btn.getAttribute("data-item-id");
+          const val = btn.getAttribute("data-val");
+          activeModal.checks[itemId] = val;
+          renderModalChecklistRows();
+        });
+      });
+    }
+
+    function getFilteredEquips() {
+      const category = document.getElementById("equipFilterCategory").value;
+      const facility = document.getElementById("equipFilterFacility").value;
+      const floor = document.getElementById("equipFilterFloor").value;
+      const room = document.getElementById("equipFilterRoom").value;
+      const search = document.getElementById("equipFilterSearch").value.trim().toLowerCase();
+
+      return equipMasterList.filter(item => {
+        if (selectedArea && item.area !== selectedArea) return false;
+        if (category && !item.name.includes(category)) return false;
+        if (facility && item.facility !== facility) return false;
+        if (floor && item.floor !== floor) return false;
+        if (room && item.room !== room) return false;
+        if (search) {
+          const matchCode = (item.code || "").toLowerCase().includes(search);
+          const matchMgmt = (item.mgmtNo || "").toLowerCase().includes(search);
+          const matchLoc = (item.detailLoc || "").toLowerCase().includes(search);
+          const matchName = (item.name || "").toLowerCase().includes(search);
+          if (!matchCode && !matchMgmt && !matchLoc && !matchName) return false;
+        }
+        return true;
+      });
+    }
+
+    function renderEquipAreaChips() {
+      const container = document.getElementById("equipAreaChipsContainer");
+      const areas = ["전체", "A00", "A01", "A02", "A03", "A04", "A05", "A06", "RA00"];
+
+      container.innerHTML = areas.map(area => {
+        const isAll = area === "전체";
+        const isSelected = isAll ? !selectedArea : selectedArea === area;
+        const count = isAll ? equipMasterList.length : equipMasterList.filter(e => e.area === area).length;
+
+        return `
+          <button type="button" class="btn-area-chip px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${isSelected ? 'bg-rose-600 text-white shadow-sm shadow-rose-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}" data-area="${isAll ? '' : area}">
+            ${area} <span class="text-[10px] opacity-80 font-mono font-normal">(${count})</span>
+          </button>
+        `;
+      }).join('');
+
+      container.querySelectorAll(".btn-area-chip").forEach(btn => {
+        btn.addEventListener("click", () => {
+          selectedArea = btn.getAttribute("data-area");
+          renderEquipAreaChips();
+          populateEquipDropdownFilters();
+          renderEquipCards();
+          updateStatusMetrics();
+        });
+      });
+    }
+
+    function populateEquipDropdownFilters() {
+      const baseList = selectedArea ? equipMasterList.filter(e => e.area === selectedArea) : equipMasterList;
+
+      const facilitySelect = document.getElementById("equipFilterFacility");
+      const floorSelect = document.getElementById("equipFilterFloor");
+      const roomSelect = document.getElementById("equipFilterRoom");
+      const catSelect = document.getElementById("equipFilterCategory");
+
+      const currentFacility = facilitySelect.value;
+      const currentFloor = floorSelect.value;
+      const currentRoom = roomSelect.value;
+      const currentCat = catSelect.value;
+
+      const facilities = [...new Set(baseList.map(e => e.facility).filter(Boolean))];
+      const floors = [...new Set(baseList.map(e => e.floor).filter(Boolean))];
+      const rooms = [...new Set(baseList.map(e => e.room).filter(Boolean))];
+      const cats = ["분말 소화기", "청정 소화기", "금속 소화기", "CO2 소화기", "강화액 소화기"];
+
+      facilitySelect.innerHTML = `<option value="">전체 사업장 (${facilities.length})</option>` + facilities.map(f => `<option value="${f}">${f}</option>`).join('');
+      floorSelect.innerHTML = `<option value="">전체 층수 (${floors.length})</option>` + floors.map(fl => `<option value="${fl}">${fl}</option>`).join('');
+      roomSelect.innerHTML = `<option value="">전체 룸/구역 (${rooms.length})</option>` + rooms.map(r => `<option value="${r}">${r}</option>`).join('');
+      catSelect.innerHTML = `<option value="">전체 종류</option>` + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+
+      if (facilities.includes(currentFacility)) facilitySelect.value = currentFacility;
+      if (floors.includes(currentFloor)) floorSelect.value = currentFloor;
+      if (rooms.includes(currentRoom)) roomSelect.value = currentRoom;
+      if (cats.includes(currentCat)) catSelect.value = currentCat;
+    }
+
+    function renderEquipCards() {
+      const container = document.getElementById("equipCardListContainer");
+      const list = getFilteredEquips();
+      document.getElementById("equipFilteredCount").textContent = `${list.length}개소`;
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="py-12 sm:py-16 text-center bg-white rounded-2xl border border-slate-200">
+            <i class="fa-solid fa-fire-extinguisher text-3xl sm:text-4xl text-slate-300 mb-2"></i>
+            <p class="text-xs sm:text-sm font-bold text-slate-600">조회 조건에 해당하는 설비/장비가 없습니다.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = list.map(item => {
+        const rec = inspectionRecords[`EQUIP_${item.code}`];
+        const isDone = !!rec;
+        const isPass = rec?.status === "PASS";
+        const isIssue = rec?.status === "ISSUE";
+
+        let statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200">미점검</span>`;
+        let borderClass = "border-slate-200/90";
+        let checkBtnClass = "bg-slate-100 text-slate-400 hover:bg-slate-200";
+
+        if (isPass) {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">양호 완료</span>`;
+          borderClass = "border-emerald-300 bg-emerald-50/20";
+          checkBtnClass = "bg-emerald-500 text-white shadow-sm shadow-emerald-200";
+        } else if (isIssue) {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-200">이상 발생</span>`;
+          borderClass = "border-rose-300 bg-rose-50/20";
+          checkBtnClass = "bg-rose-500 text-white shadow-sm shadow-rose-200";
+        }
+
+        const tpl = TEMPLATES_MASTER.find(t => t.id === item.templateId) || TEMPLATES_MASTER[0];
+
+        return `
+          <div class="bg-white rounded-2xl p-3.5 sm:p-4 border ${borderClass} shadow-xs hover:shadow-sm transition-all">
+            <div class="flex items-start justify-between gap-2.5 sm:gap-3">
+              <div class="flex items-start space-x-2.5 sm:space-x-3 flex-1 min-w-0">
+                <button type="button" title="원터치 [O 양호] 완료" class="btn-equip-quick-pass w-10 h-10 sm:w-11 sm:h-11 rounded-xl ${checkBtnClass} flex items-center justify-center shrink-0 mt-0.5 transition-all active:scale-95" data-code="${item.code}">
+                  <i class="fa-solid ${isDone ? 'fa-check' : 'fa-circle-check'} text-base"></i>
+                </button>
+                <div class="space-y-1 min-w-0 flex-1">
+                  <div class="flex flex-wrap items-center gap-1 sm:gap-2">
+                    <span class="font-mono-code font-bold text-xs sm:text-sm text-slate-900 flex items-center gap-1">
+                      <i class="fa-solid fa-qrcode text-rose-500 text-[11px]"></i>
+                      <span class="break-all">${item.code}</span>
+                    </span>
+                    <span class="px-2 py-0.5 rounded-md font-bold text-[10px] sm:text-xs bg-rose-50 text-rose-700 border border-rose-200">
+                      ${item.mgmtNo}
+                    </span>
+                    <span class="px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-slate-100 text-slate-700">#${item.area}</span>
+                    ${statusBadge}
+                  </div>
+                  <p class="text-xs sm:text-sm text-slate-800 font-bold leading-snug">
+                    ${item.facility} ${item.floor} &rsaquo; ${item.room} <span class="font-normal text-slate-500">(${item.detailLoc})</span>
+                  </p>
+                  <div class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[10px] sm:text-[11px] text-slate-500">
+                    <span class="font-semibold text-slate-800">${item.name}</span>
+                    <span class="truncate">점검표: <b class="text-indigo-600 font-bold">${tpl.name}</b></span>
+                    ${item.agent ? `<span>약제: ${item.agent} (${item.amount})</span>` : ''}
+                    ${item.expire ? `<span>충전기한: <b class="font-mono text-slate-700">${item.expire}</b></span>` : ''}
+                  </div>
+                  ${isDone ? `
+                    <div class="pt-1 flex flex-wrap items-center gap-1.5 text-[10px] sm:text-[11px]">
+                      <span class="text-slate-500"><i class="fa-solid fa-calendar-check text-emerald-500 mr-1"></i>${rec.date} (${rec.inspector})</span>
+                      ${rec.note ? `<span class="text-rose-600 font-semibold bg-rose-50 px-2 py-0.5 rounded border border-rose-100">특이: ${rec.note}</span>` : ''}
+                    </div>
+                  ` : ''}
+                </div>
+              </div>
+              <button type="button" class="btn-open-equip-detail shrink-0 px-2.5 sm:px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs transition-colors active:scale-95" data-code="${item.code}">
+                상세
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // 원터치 양호 버튼 이벤트
+      container.querySelectorAll(".btn-equip-quick-pass").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const code = btn.getAttribute("data-code");
+          const equip = equipMasterList.find(e => e.code === code);
+          if (!equip) return;
+
+          const key = `EQUIP_${code}`;
+          if (inspectionRecords[key]) {
+            delete inspectionRecords[key];
+            showToast(`${code} 점검 취소`);
+          } else {
+            const tpl = TEMPLATES_MASTER.find(t => t.id === equip.templateId) || TEMPLATES_MASTER[0];
+            const checks = {};
+            tpl.items.forEach(it => { checks[it.id] = "O"; });
+
+            inspectionRecords[key] = {
+              mode: "EQUIP",
+              targetId: code,
+              title: `${equip.name} (${equip.mgmtNo})`,
+              sub: `${equip.facility} ${equip.floor} ${equip.room}`,
+              status: "PASS",
+              checks: checks,
+              note: "",
+              inspector: "담당자",
+              date: new Date().toISOString().split("T")[0],
+              timestamp: Date.now()
+            };
+            showToast(`${equip.mgmtNo} [O 양호] 점검 완료`);
+          }
+          saveRecords();
+          renderEquipCards();
+        });
+      });
+
+      // 상세 점검 모달 열기
+      container.querySelectorAll(".btn-open-equip-detail").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const code = btn.getAttribute("data-code");
+          const equip = equipMasterList.find(e => e.code === code);
+          if (!equip) return;
+          openInspectionModal("EQUIP", code, `${equip.code} [${equip.mgmtNo}]`, `${equip.facility} ${equip.floor} ${equip.room} (${equip.detailLoc})`, equip.templateId);
+        });
+      });
+    }
+
+    function renderAreaCards() {
+      const container = document.getElementById("areaCardsContainer");
+      container.innerHTML = AREAS_MASTER.map(area => {
+        const key = `AREA_${area.id}`;
+        const rec = inspectionRecords[key];
+        const isDone = !!rec;
+        const isPass = rec?.status === "PASS";
+        const isIssue = rec?.status === "ISSUE";
+
+        let statusBadge = `<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200">미점검</span>`;
+        let borderClass = "border-slate-200";
+        if (isPass) {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">순찰 양호</span>`;
+          borderClass = "border-indigo-300 bg-indigo-50/20";
+        } else if (isIssue) {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">순찰 이상</span>`;
+          borderClass = "border-rose-300 bg-rose-50/20";
+        }
+
+        const equipCount = equipMasterList.filter(e => e.area === area.id).length;
+        const tpl = TEMPLATES_MASTER.find(t => t.id === area.tplId) || TEMPLATES_MASTER[0];
+
+        return `
+          <div class="bg-white rounded-2xl p-4 border ${borderClass} shadow-xs flex flex-col justify-between">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="px-2 py-0.5 rounded-lg text-xs font-black bg-indigo-50 text-indigo-700 border border-indigo-200 font-mono">${area.id}</span>
+                ${statusBadge}
+              </div>
+              <div>
+                <h3 class="font-extrabold text-slate-900 text-sm leading-snug">${area.name}</h3>
+                <p class="text-xs text-slate-500 mt-0.5">${area.desc}</p>
+              </div>
+              <div class="flex items-center gap-2 text-xs text-slate-600 font-medium">
+                <span>포함 설비: <b class="font-bold text-slate-900 font-mono">${equipCount}대</b></span>
+                <span>점검표: <b class="text-indigo-600">${tpl.category}</b></span>
+              </div>
+              ${isDone ? `
+                <div class="text-xs text-slate-500 pt-1 border-t border-slate-100">
+                  <span>점검자: ${rec.inspector} (${rec.date})</span>
+                  ${rec.note ? `<p class="text-rose-600 font-bold mt-0.5">특이사항: ${rec.note}</p>` : ''}
+                </div>
+              ` : ''}
+            </div>
+            <div class="pt-3.5 flex items-center gap-2">
+              <button type="button" class="btn-area-quick-pass flex-1 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl transition-colors" data-id="${area.id}">
+                ${isDone ? '점검 취소' : 'O 양호 체크'}
+              </button>
+              <button type="button" class="btn-open-area-detail px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl" data-id="${area.id}">
+                상세점검
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.querySelectorAll(".btn-area-quick-pass").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-id");
+          const area = AREAS_MASTER.find(a => a.id === id);
+          if (!area) return;
+
+          const key = `AREA_${id}`;
+          if (inspectionRecords[key]) {
+            delete inspectionRecords[key];
+            showToast(`${area.name} 순찰점검 취소`);
+          } else {
+            const tpl = TEMPLATES_MASTER.find(t => t.id === area.tplId) || TEMPLATES_MASTER[0];
+            const checks = {};
+            tpl.items.forEach(it => { checks[it.id] = "O"; });
+
+            inspectionRecords[key] = {
+              mode: "AREA",
+              targetId: id,
+              title: `[${area.id}] ${area.name}`,
+              sub: area.desc,
+              status: "PASS",
+              checks: checks,
+              note: "",
+              inspector: "안전리더",
+              date: new Date().toISOString().split("T")[0],
+              timestamp: Date.now()
+            };
+            showToast(`${area.name} 순찰 [O 양호] 완료`);
+          }
+          saveRecords();
+          renderAreaCards();
+        });
+      });
+
+      container.querySelectorAll(".btn-open-area-detail").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-id");
+          const area = AREAS_MASTER.find(a => a.id === id);
+          if (!area) return;
+          openInspectionModal("AREA", id, `[${area.id}] ${area.name}`, area.desc, area.tplId);
+        });
+      });
+    }
+
+    function renderZoneCards() {
+      const container = document.getElementById("zoneCardsContainer");
+      const chipsContainer = document.getElementById("zoneDeptChipsContainer");
+
+      const depts = ["전체", ...new Set(zoneMasterList.map(z => z.dept).filter(Boolean))];
+      chipsContainer.innerHTML = depts.map(dept => {
+        const isAll = dept === "전체";
+        const isSelected = isAll ? !selectedDept : selectedDept === dept;
+        return `
+          <button type="button" class="btn-zone-dept-chip px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${isSelected ? 'bg-amber-500 text-white shadow-sm shadow-amber-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}" data-dept="${isAll ? '' : dept}">
+            ${dept}
+          </button>
+        `;
+      }).join('');
+
+      chipsContainer.querySelectorAll(".btn-zone-dept-chip").forEach(btn => {
+        btn.addEventListener("click", () => {
+          selectedDept = btn.getAttribute("data-dept");
+          renderZoneCards();
+          updateStatusMetrics();
+        });
+      });
+
+      const filteredZones = selectedDept ? zoneMasterList.filter(z => z.dept === selectedDept) : zoneMasterList;
+
+      container.innerHTML = filteredZones.map(zone => {
+        const key = `ZONE_${zone.id}`;
+        const rec = inspectionRecords[key];
+        const isDone = !!rec;
+        const isPass = rec?.status === "PASS";
+        const isIssue = rec?.status === "ISSUE";
+
+        let statusBadge = `<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200">미점검</span>`;
+        let borderClass = "border-slate-200";
+        if (isPass) {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">부서 양호</span>`;
+          borderClass = "border-amber-300 bg-amber-50/20";
+        } else if (isIssue) {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">부서 이상</span>`;
+          borderClass = "border-rose-300 bg-rose-50/20";
+        }
+
+        return `
+          <div class="bg-white rounded-2xl p-4 border ${borderClass} shadow-xs flex flex-col justify-between">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="px-2 py-0.5 rounded-lg text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">${zone.dept}</span>
+                ${statusBadge}
+              </div>
+              <div>
+                <h3 class="font-extrabold text-slate-900 text-sm leading-snug">${zone.name}</h3>
+                <p class="text-xs text-slate-500 mt-0.5">${zone.facility} ${zone.floor}</p>
+              </div>
+              <p class="text-[11px] text-slate-500 font-medium">점검표: <b class="text-amber-700">부서자율 화재예방</b></p>
+              ${isDone ? `
+                <div class="text-xs text-slate-500 pt-1 border-t border-slate-100">
+                  <span>점검자: ${rec.inspector} (${rec.date})</span>
+                  ${rec.note ? `<p class="text-rose-600 font-bold mt-0.5">특이: ${rec.note}</p>` : ''}
+                </div>
+              ` : ''}
+            </div>
+            <div class="pt-3.5 flex items-center gap-2">
+              <button type="button" class="btn-zone-quick-pass flex-1 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-xs rounded-xl transition-colors" data-id="${zone.id}">
+                ${isDone ? '점검 취소' : 'O 양호 완료'}
+              </button>
+              <button type="button" class="btn-open-zone-detail px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl" data-id="${zone.id}">
+                점검표
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.querySelectorAll(".btn-zone-quick-pass").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-id");
+          const zone = zoneMasterList.find(z => z.id === id);
+          if (!zone) return;
+
+          const key = `ZONE_${id}`;
+          if (inspectionRecords[key]) {
+            delete inspectionRecords[key];
+            showToast(`${zone.name} 점검 취소`);
+          } else {
+            const tpl = TEMPLATES_MASTER.find(t => t.id === "TPL_ZONE_DAILY") || TEMPLATES_MASTER[0];
+            const checks = {};
+            tpl.items.forEach(it => { checks[it.id] = "O"; });
+
+            inspectionRecords[key] = {
+              mode: "ZONE",
+              targetId: id,
+              title: `${zone.name} (${zone.dept})`,
+              sub: `${zone.facility} ${zone.floor}`,
+              status: "PASS",
+              checks: checks,
+              note: "",
+              inspector: `${zone.dept} 담당자`,
+              date: new Date().toISOString().split("T")[0],
+              timestamp: Date.now()
+            };
+            showToast(`${zone.name} 부서점검 [O 양호] 완료`);
+          }
+          saveRecords();
+          renderZoneCards();
+        });
+      });
+
+      container.querySelectorAll(".btn-open-zone-detail").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-id");
+          const zone = zoneMasterList.find(z => z.id === id);
+          if (!zone) return;
+          openInspectionModal("ZONE", id, `${zone.name} (${zone.dept})`, `${zone.facility} ${zone.floor}`, "TPL_ZONE_DAILY");
+        });
+      });
+    }
+
+    function renderInspectionHistory() {
+      const tbody = document.getElementById("historyTableBody");
+      const startDate = document.getElementById("historyFilterStartDate").value;
+      const endDate = document.getElementById("historyFilterEndDate").value;
+      const modeFilter = document.getElementById("historyFilterMode").value;
+      const statusFilter = document.getElementById("historyFilterStatus").value;
+
+      const records = Object.values(inspectionRecords).filter(rec => {
+        if (startDate && rec.date < startDate) return false;
+        if (endDate && rec.date > endDate) return false;
+        if (modeFilter && rec.mode !== modeFilter) return false;
+        if (statusFilter && rec.status !== statusFilter) return false;
+        return true;
+      }).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+      document.getElementById("historyRecordCount").textContent = `${records.length}건`;
+
+      if (records.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="text-center py-10 text-slate-400">
+              <i class="fa-solid fa-clipboard-question text-3xl mb-1.5"></i>
+              <p class="text-xs">조건에 해당하는 점검 기록이 없습니다.</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = records.map(rec => {
+        const modeBadge = rec.mode === "EQUIP" 
+          ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700">1.장비</span>`
+          : (rec.mode === "AREA" ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700">2.AREA</span>` : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700">3.ZONE</span>`);
+
+        const statusBadge = rec.status === "PASS"
+          ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">양호</span>`
+          : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800">이상</span>`;
+
+        return `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="p-2.5 font-mono text-slate-600">${rec.date}</td>
+            <td class="p-2.5">${modeBadge}</td>
+            <td class="p-2.5 font-bold text-slate-900">${rec.title}</td>
+            <td class="p-2.5 text-slate-500">${rec.sub}</td>
+            <td class="p-2.5">${statusBadge}</td>
+            <td class="p-2.5 text-slate-700 font-semibold">${rec.inspector}</td>
+            <td class="p-2.5 text-rose-600 font-bold">${rec.note || '-'}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function exportRecordsToCSV() {
+      const records = Object.values(inspectionRecords);
+      if (records.length === 0) {
+        showToast("다운로드할 점검 기록이 없습니다.", false);
+        return;
+      }
+
+      let csv = "\uFEFF점검일자,점검모드,대상코드,대상명칭,위치정보,판정결과,점검자,특이사항\n";
+      records.forEach(r => {
+        const clean = (txt) => `"${(txt || '').replace(/"/g, '""')}"`;
+        csv += `${clean(r.date)},${clean(r.mode)},${clean(r.targetId)},${clean(r.title)},${clean(r.sub)},${clean(r.status === 'PASS' ? '양호' : '이상')},${clean(r.inspector)},${clean(r.note)}\n`;
+      });
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `SafetyCheck_점검결과_${new Date().toISOString().split("T")[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast("엑셀(CSV) 파일이 다운로드되었습니다.");
+    }
+
+    function renderMasterViews() {
+      // 1. 장비 마스터
+      const tbodyEquip = document.getElementById("masterEquipTableBody");
+      const search = (document.getElementById("masterEquipSearchInput")?.value || "").toLowerCase();
+      const filtered = equipMasterList.filter(e => {
+        if (!search) return true;
+        return (e.code + e.mgmtNo + e.facility + e.floor + e.room + e.name).toLowerCase().includes(search);
+      });
+
+      tbodyEquip.innerHTML = filtered.map((e, idx) => `
+        <tr class="hover:bg-slate-50">
+          <td class="p-2.5 font-mono font-bold text-slate-900">${e.code}</td>
+          <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-rose-50 text-rose-700 font-bold">${e.mgmtNo}</span></td>
+          <td class="p-2.5 font-semibold">${e.name}</td>
+          <td class="p-2.5 text-slate-600">${e.facility} ${e.floor} &rsaquo; ${e.room}</td>
+          <td class="p-2.5 text-slate-500">${e.agent || '-'} (${e.amount || '-'})</td>
+          <td class="p-2.5 font-mono text-slate-600">${e.expire || '-'}</td>
+          <td class="p-2.5 font-bold text-indigo-600 font-mono">${e.area}</td>
+          <td class="p-2.5 text-center">
+            <button type="button" class="btn-delete-master-equip text-rose-600 hover:text-rose-800 font-bold px-2 py-1" data-code="${e.code}">삭제</button>
+          </td>
+        </tr>
+      `).join('');
+
+      tbodyEquip.querySelectorAll(".btn-delete-master-equip").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const code = btn.getAttribute("data-code");
+          equipMasterList = equipMasterList.filter(e => e.code !== code);
+          saveEquipMaster();
+          renderMasterViews();
+          renderEquipCards();
+          showToast(`${code} 설비가 삭제되었습니다.`);
+        });
+      });
+
+      // 2. Zone 부서 매핑
+      const tbodyZone = document.getElementById("masterZoneTableBody");
+      tbodyZone.innerHTML = zoneMasterList.map(z => `
+        <tr class="hover:bg-slate-50">
+          <td class="p-2.5 font-mono font-bold text-slate-800">${z.id}</td>
+          <td class="p-2.5 font-bold text-slate-900">${z.name}</td>
+          <td class="p-2.5 text-slate-600">${z.facility} ${z.floor}</td>
+          <td class="p-2.5 font-bold text-amber-700">${z.dept}</td>
+          <td class="p-2.5 text-center">
+            <button type="button" class="btn-edit-zone-dept text-indigo-600 hover:underline font-bold" data-id="${z.id}">부서변경</button>
+          </td>
+        </tr>
+      `).join('');
+
+      tbodyZone.querySelectorAll(".btn-edit-zone-dept").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-id");
+          const zone = zoneMasterList.find(z => z.id === id);
+          if (!zone) return;
+          const nextDept = prompt(`${zone.name}의 새 담당 부서를 입력하세요:`, zone.dept);
+          if (nextDept && nextDept.trim()) {
+            zone.dept = nextDept.trim();
+            localStorage.setItem("SAFETYCHECK_ZONES_V3", JSON.stringify(zoneMasterList));
+            renderMasterViews();
+            renderZoneCards();
+            showToast(`${zone.name} 담당부서가 변경되었습니다.`);
+          }
+        });
+      });
+
+      // 3. 점검표 템플릿
+      const tplContainer = document.getElementById("masterTplContainer");
+      tplContainer.innerHTML = TEMPLATES_MASTER.map(tpl => `
+        <div class="border border-slate-200 rounded-xl p-3.5 bg-slate-50/50 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-indigo-700">${tpl.category}</span>
+            <span class="text-[10px] font-mono text-slate-400 font-bold">${tpl.items.length}개 항목</span>
+          </div>
+          <h4 class="font-extrabold text-slate-900 text-sm">${tpl.name}</h4>
+          <ol class="text-xs text-slate-600 space-y-1 list-decimal list-inside bg-white p-2.5 rounded-lg border border-slate-200">
+            ${tpl.items.map(it => `<li class="truncate">${it.title}</li>`).join('')}
+          </ol>
+        </div>
+      `).join('');
+    }
+
+    function switchMasterSubTab(tabName) {
+      const views = {
+        equip: document.getElementById("subViewEquipMaster"),
+        zone: document.getElementById("subViewZoneMaster"),
+        tpl: document.getElementById("subViewTplMaster"),
+        sync: document.getElementById("subViewGoogleSync")
+      };
+      const buttons = {
+        equip: document.getElementById("btnSubTabEquipMaster"),
+        zone: document.getElementById("btnSubTabZoneMaster"),
+        tpl: document.getElementById("btnSubTabTplMaster"),
+        sync: document.getElementById("btnSubTabGoogleSync")
+      };
+
+      Object.keys(views).forEach(k => {
+        if (!views[k] || !buttons[k]) return;
+        if (k === tabName) {
+          views[k].classList.remove("hidden");
+          if (k === "sync") {
+            buttons[k].className = "flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all bg-emerald-600 text-white shadow-xs border border-emerald-600 shrink-0 flex items-center gap-1.5";
+          } else {
+            buttons[k].className = "flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all bg-white text-slate-900 shadow-xs border border-slate-200 shrink-0";
+          }
+        } else {
+          views[k].classList.add("hidden");
+          if (k === "sync") {
+            buttons[k].className = "flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-semibold text-emerald-700 hover:text-emerald-900 bg-emerald-50/70 hover:bg-emerald-100/70 rounded-lg transition-all shrink-0 flex items-center gap-1.5";
+          } else {
+            buttons[k].className = "flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-lg transition-all shrink-0";
+          }
+        }
+      });
+    }
+
+    // 구글 시트 URL 저장/로드 관리
+    function getGoogleScriptUrl() {
+      return localStorage.getItem("SAFETYCHECK_GOOGLE_SCRIPT_URL") || "";
+    }
+
+    function setGoogleScriptUrl(url) {
+      localStorage.setItem("SAFETYCHECK_GOOGLE_SCRIPT_URL", url.trim());
+      const input = document.getElementById("googleScriptUrlInput");
+      if (input) input.value = url.trim();
+    }
+
+    // 1. 구글시트에서 기준정보 가져오기 (Pull)
+    async function syncFromGoogleSheets() {
+      const url = getGoogleScriptUrl();
+      if (!url) {
+        showToast("구글 앱스 스크립트 URL을 먼저 등록해주세요.", false);
+        return;
+      }
+
+      const syncBadge = document.getElementById("googleSyncBadge");
+      const btn = document.getElementById("btnFetchFromGoogle");
+      const originalBtnText = btn.innerHTML;
+
+      try {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>불러오는 중...</span>`;
+        syncBadge.textContent = "동기화 중";
+        syncBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 animate-pulse";
+
+        const res = await fetch(url, { method: "GET" });
+        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+        
+        const fetchedItems = await res.json();
+        if (Array.isArray(fetchedItems) && fetchedItems.length > 0) {
+          // 데이터 매핑 및 저장
+          equipMasterList = fetchedItems.map(item => ({
+            code: item.code || "",
+            facility: item.facility || "",
+            floor: item.floor || "",
+            room: item.room || "",
+            equipCode: item.equipCode || "",
+            no: item.no || "",
+            name: item.name || "소화기",
+            detailLoc: item.detailLoc || "",
+            agent: item.agent || "",
+            amount: item.amount || "",
+            expire: item.expire || "",
+            area: item.area || "A00",
+            mgmtNo: item.mgmtNo || "",
+            dept: item.dept || "",
+            templateId: item.templateId || "TPL_FIRE_EXT"
+          }));
+
+          saveEquipMaster();
+          deriveZonesAndAreasFromEquips();
+          populateEquipDropdownFilters();
+          renderEquipCards();
+          renderAreaCards();
+          renderZoneCards();
+          renderMasterViews();
+          updateStatusMetrics();
+
+          const nowStr = new Date().toLocaleString();
+          localStorage.setItem("SAFETYCHECK_GOOGLE_LAST_SYNC", nowStr);
+          document.getElementById("lastGoogleSyncTime").textContent = nowStr;
+
+          syncBadge.textContent = `완료 (${equipMasterList.length}건)`;
+          syncBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800";
+          showToast(`구글시트에서 ${equipMasterList.length}건의 설비 기준정보를 성공적으로 동기화했습니다!`);
+        } else {
+          showToast("구글시트에서 가져올 설비 데이터가 비어 있습니다.", false);
+          syncBadge.textContent = "데이터 없음";
+          syncBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-600";
+        }
+      } catch (err) {
+        console.error("Google Sheets Fetch Error:", err);
+        showToast("구글시트 동기화 실패: URL 또는 배포 권한을 확인하세요.", false);
+        syncBadge.textContent = "오류 발생";
+        syncBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800";
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalBtnText;
+      }
+    }
+
+    // 2. 웹앱 데이터를 구글시트로 내보내기/덮어쓰기 (Push)
+    async function syncToGoogleSheets() {
+      const url = getGoogleScriptUrl();
+      if (!url) {
+        showToast("구글 앱스 스크립트 URL을 먼저 등록해주세요.", false);
+        return;
+      }
+
+      const syncBadge = document.getElementById("googleSyncBadge");
+      const btn = document.getElementById("btnPushToGoogle");
+      const originalBtnText = btn.innerHTML;
+
+      try {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>업로드 중...</span>`;
+        syncBadge.textContent = "업로드 중";
+        syncBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800 animate-pulse";
+
+        const payload = {
+          action: "updateMaster",
+          items: equipMasterList
+        };
+
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" }, // CORS preflight 우회용
+          body: JSON.stringify(payload)
+        });
+
+        const nowStr = new Date().toLocaleString();
+        localStorage.setItem("SAFETYCHECK_GOOGLE_LAST_SYNC", nowStr);
+        document.getElementById("lastGoogleSyncTime").textContent = nowStr;
+
+        syncBadge.textContent = `업로드 완료 (${equipMasterList.length}건)`;
+        syncBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800";
+        showToast(`웹앱 기준정보 ${equipMasterList.length}건이 구글시트에 안전하게 반영되었습니다!`);
+      } catch (err) {
+        console.error("Google Sheets Push Error:", err);
+        showToast("구글시트 전송 실패: 네트워크 및 배포 권한을 확인하세요.", false);
+        syncBadge.textContent = "전송 오류";
+        syncBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800";
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalBtnText;
+      }
+    }
+
+    function updateStatusMetrics() {
+      let total = 0;
+      let completed = 0;
+      let passes = 0;
+      let issues = 0;
+
+      if (currentMode === "equip") {
+        document.getElementById("statModeTitle").textContent = "1. 시설장비 예방점검";
+        document.getElementById("statTargetScopeDisplay").textContent = selectedArea ? `MY AREA: #${selectedArea}` : "전체 설비 대상";
+        
+        const targetList = selectedArea ? equipMasterList.filter(e => e.area === selectedArea) : equipMasterList;
+        total = targetList.length;
+
+        targetList.forEach(e => {
+          const rec = inspectionRecords[`EQUIP_${e.code}`];
+          if (rec) {
+            completed++;
+            if (rec.status === "PASS") passes++;
+            else issues++;
+          }
+        });
+      } else if (currentMode === "area") {
+        document.getElementById("statModeTitle").textContent = "2. MY AREA 순찰점검";
+        document.getElementById("statTargetScopeDisplay").textContent = "전체 구역 순찰포인트";
+        total = AREAS_MASTER.length;
+
+        AREAS_MASTER.forEach(a => {
+          const rec = inspectionRecords[`AREA_${a.id}`];
+          if (rec) {
+            completed++;
+            if (rec.status === "PASS") passes++;
+            else issues++;
+          }
+        });
+      } else if (currentMode === "zone") {
+        document.getElementById("statModeTitle").textContent = "3. MY ZONE 부서점검";
+        document.getElementById("statTargetScopeDisplay").textContent = selectedDept ? `부서: ${selectedDept}` : "전체 부서 위임 룸";
+
+        const targetList = selectedDept ? zoneMasterList.filter(z => z.dept === selectedDept) : zoneMasterList;
+        total = targetList.length;
+
+        targetList.forEach(z => {
+          const rec = inspectionRecords[`ZONE_${z.id}`];
+          if (rec) {
+            completed++;
+            if (rec.status === "PASS") passes++;
+            else issues++;
+          }
+        });
+      } else {
+        total = equipMasterList.length + AREAS_MASTER.length + zoneMasterList.length;
+        completed = Object.keys(inspectionRecords).length;
+        Object.values(inspectionRecords).forEach(r => {
+          if (r.status === "PASS") passes++;
+          else issues++;
+        });
+        document.getElementById("statModeTitle").textContent = "통합 점검 현황";
+        document.getElementById("statTargetScopeDisplay").textContent = "장비 + 구역 + 부서";
+      }
+
+      const pending = Math.max(0, total - completed);
+      const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+      const passPercent = total > 0 ? (passes / total) * 100 : 0;
+      const issuePercent = total > 0 ? (issues / total) * 100 : 0;
+
+      document.getElementById("statPercent").textContent = `${percent}%`;
+      document.getElementById("statCounts").textContent = `(${completed} / ${total}개 완료)`;
+      document.getElementById("statNormalCount").textContent = passes;
+      document.getElementById("statIssueCount").textContent = issues;
+      document.getElementById("statPendingCount").textContent = pending;
+
+      document.getElementById("statProgressBarPass").style.width = `${passPercent}%`;
+      document.getElementById("statProgressBarIssue").style.width = `${issuePercent}%`;
+    }
+
+    function switchMode(mode) {
+      if (mode === "master" && !isMasterUnlocked) {
+        document.getElementById("adminPinInput").value = "";
+        document.getElementById("adminPinError").classList.add("hidden");
+        document.getElementById("adminPinModal").classList.remove("hidden");
+        document.getElementById("adminPinModal").classList.add("flex");
+        return;
+      }
+
+      currentMode = mode;
+
+      // 뷰 가시성 제어
+      document.getElementById("viewEquipSection").classList.toggle("hidden", mode !== "equip");
+      document.getElementById("viewAreaSection").classList.toggle("hidden", mode !== "area");
+      document.getElementById("viewZoneSection").classList.toggle("hidden", mode !== "zone");
+      document.getElementById("viewHistorySection").classList.toggle("hidden", mode !== "history");
+      document.getElementById("viewMasterSection").classList.toggle("hidden", mode !== "master");
+
+      // 헤더 뱃지
+      const titles = { equip: "1. 시설장비", area: "2. MY AREA", zone: "3. MY ZONE", history: "점검 기록 📊", master: "기준정보 🔒" };
+      document.getElementById("activeModeBadge").textContent = titles[mode] || mode;
+
+      // 탭 활성 스타일 동기화
+      document.querySelectorAll(".mode-tab-btn").forEach(btn => {
+        const btnMode = btn.getAttribute("data-mode");
+        if (btnMode === mode) {
+          btn.className = "mode-tab-btn px-3 py-1.5 rounded-lg sm:rounded-xl transition-all bg-white text-slate-900 shadow-xs border border-slate-200 font-bold shrink-0 flex items-center gap-1.5";
+        } else {
+          btn.className = "mode-tab-btn px-3 py-1.5 rounded-lg sm:rounded-xl transition-all text-slate-500 hover:text-slate-800 font-semibold shrink-0 flex items-center gap-1.5";
+        }
+      });
+
+      if (mode === "equip") renderEquipCards();
+      else if (mode === "area") renderAreaCards();
+      else if (mode === "zone") renderZoneCards();
+      else if (mode === "history") renderInspectionHistory();
+      else if (mode === "master") renderMasterViews();
+
+      updateStatusMetrics();
+    }
+
+    // 관리자 PIN 확인
+    document.getElementById("btnConfirmAdminPin").addEventListener("click", () => {
+      const pin = document.getElementById("adminPinInput").value;
+      if (pin === "3333") {
+        isMasterUnlocked = true;
+        document.getElementById("adminPinModal").classList.add("hidden");
+        document.getElementById("adminPinModal").classList.remove("flex");
+        switchMode("master");
+        showToast("관리자 모드로 전환되었습니다.");
+      } else {
+        document.getElementById("adminPinError").classList.remove("hidden");
+      }
+    });
+
+    document.getElementById("btnCancelAdminPin").addEventListener("click", () => {
+      document.getElementById("adminPinModal").classList.add("hidden");
+      document.getElementById("adminPinModal").classList.remove("flex");
+    });
+
+    document.getElementById("btnLockMaster").addEventListener("click", () => {
+      isMasterUnlocked = false;
+      switchMode("equip");
+      showToast("관리자 모드가 종료되었습니다.");
+    });
+
+    // 점검 모달 저장 & 취소
+    document.getElementById("btnSaveModal").addEventListener("click", () => {
+      if (!activeModal.targetId) return;
+
+      const key = `${activeModal.mode}_${activeModal.targetId}`;
+      const note = document.getElementById("modalNoteInput").value.trim();
+      const inspector = document.getElementById("modalInspectorInput").value.trim() || "담당자";
+      const date = document.getElementById("modalDateInput").value || new Date().toISOString().split("T")[0];
+
+      let hasIssue = Object.values(activeModal.checks).some(val => val === "X" || val === "△");
+      if (note.includes("불량") || note.includes("파손") || note.includes("누수")) hasIssue = true;
+
+      inspectionRecords[key] = {
+        mode: activeModal.mode,
+        targetId: activeModal.targetId,
+        title: activeModal.title,
+        sub: activeModal.sub,
+        status: hasIssue ? "ISSUE" : "PASS",
+        checks: { ...activeModal.checks },
+        note: note,
+        inspector: inspector,
+        date: date,
+        timestamp: Date.now()
+      };
+
+      saveRecords();
+      closeInspectionModal();
+      showToast(`${activeModal.title} 점검이 저장되었습니다.`);
+
+      if (activeModal.mode === "EQUIP") renderEquipCards();
+      else if (activeModal.mode === "AREA") renderAreaCards();
+      else if (activeModal.mode === "ZONE") renderZoneCards();
+    });
+
+    document.getElementById("btnResetModalRecord").addEventListener("click", () => {
+      const key = `${activeModal.mode}_${activeModal.targetId}`;
+      if (inspectionRecords[key]) {
+        delete inspectionRecords[key];
+        saveRecords();
+        showToast(`${activeModal.title} 점검이 취소되었습니다.`);
+        if (activeModal.mode === "EQUIP") renderEquipCards();
+        else if (activeModal.mode === "AREA") renderAreaCards();
+        else if (activeModal.mode === "ZONE") renderZoneCards();
+      }
+      closeInspectionModal();
+    });
+
+    document.getElementById("btnCloseInspectionModal").addEventListener("click", closeInspectionModal);
+    document.getElementById("btnCancelModal").addEventListener("click", closeInspectionModal);
+
+    // 일괄 양호 버튼들
+    document.getElementById("btnEquipBatchPass").addEventListener("click", () => {
+      const list = getFilteredEquips();
+      if (list.length === 0) return;
+
+      list.forEach(equip => {
+        const key = `EQUIP_${equip.code}`;
+        const tpl = TEMPLATES_MASTER.find(t => t.id === equip.templateId) || TEMPLATES_MASTER[0];
+        const checks = {};
+        tpl.items.forEach(it => { checks[it.id] = "O"; });
+
+        inspectionRecords[key] = {
+          mode: "EQUIP",
+          targetId: equip.code,
+          title: `${equip.name} (${equip.mgmtNo})`,
+          sub: `${equip.facility} ${equip.floor} ${equip.room}`,
+          status: "PASS",
+          checks: checks,
+          note: "",
+          inspector: "담당자",
+          date: new Date().toISOString().split("T")[0],
+          timestamp: Date.now()
+        };
+      });
+
+      saveRecords();
+      renderEquipCards();
+      showToast(`${list.length}개 설비 전체 [O 양호] 처리 완료`);
+    });
+
+    document.getElementById("btnAreaBatchPass").addEventListener("click", () => {
+      AREAS_MASTER.forEach(area => {
+        const key = `AREA_${area.id}`;
+        const tpl = TEMPLATES_MASTER.find(t => t.id === area.tplId) || TEMPLATES_MASTER[0];
+        const checks = {};
+        tpl.items.forEach(it => { checks[it.id] = "O"; });
+
+        inspectionRecords[key] = {
+          mode: "AREA",
+          targetId: area.id,
+          title: `[${area.id}] ${area.name}`,
+          sub: area.desc,
+          status: "PASS",
+          checks: checks,
+          note: "",
+          inspector: "안전리더",
+          date: new Date().toISOString().split("T")[0],
+          timestamp: Date.now()
+        };
+      });
+
+      saveRecords();
+      renderAreaCards();
+      showToast("전체 MY AREA [O 양호] 순찰 완료");
+    });
+
+    document.getElementById("btnZoneBatchPass").addEventListener("click", () => {
+      const list = selectedDept ? zoneMasterList.filter(z => z.dept === selectedDept) : zoneMasterList;
+      list.forEach(zone => {
+        const key = `ZONE_${zone.id}`;
+        const tpl = TEMPLATES_MASTER.find(t => t.id === "TPL_ZONE_DAILY") || TEMPLATES_MASTER[0];
+        const checks = {};
+        tpl.items.forEach(it => { checks[it.id] = "O"; });
+
+        inspectionRecords[key] = {
+          mode: "ZONE",
+          targetId: zone.id,
+          title: `${zone.name} (${zone.dept})`,
+          sub: `${zone.facility} ${zone.floor}`,
+          status: "PASS",
+          checks: checks,
+          note: "",
+          inspector: `${zone.dept} 담당자`,
+          date: new Date().toISOString().split("T")[0],
+          timestamp: Date.now()
+        };
+      });
+
+      saveRecords();
+      renderZoneCards();
+      showToast(`${list.length}개 MY ZONE 부서점검 [O 양호] 완료`);
+    });
+
+    // 필터 리셋 버튼
+    document.getElementById("btnEquipResetFilter").addEventListener("click", () => {
+      selectedArea = "";
+      document.getElementById("equipFilterCategory").value = "";
+      document.getElementById("equipFilterFacility").value = "";
+      document.getElementById("equipFilterFloor").value = "";
+      document.getElementById("equipFilterRoom").value = "";
+      document.getElementById("equipFilterSearch").value = "";
+      renderEquipAreaChips();
+      populateEquipDropdownFilters();
+      renderEquipCards();
+      updateStatusMetrics();
+    });
+
+    // 드롭다운 및 검색 이벤트
+    ["equipFilterCategory", "equipFilterFacility", "equipFilterFloor", "equipFilterRoom"].forEach(id => {
+      document.getElementById(id).addEventListener("change", renderEquipCards);
+    });
+    document.getElementById("equipFilterSearch").addEventListener("input", renderEquipCards);
+
+    // 점검기록 필터 이벤트
+    ["historyFilterStartDate", "historyFilterEndDate", "historyFilterMode", "historyFilterStatus"].forEach(id => {
+      document.getElementById(id).addEventListener("change", renderInspectionHistory);
+    });
+    document.getElementById("btnResetHistoryFilters").addEventListener("click", () => {
+      document.getElementById("historyFilterStartDate").value = "";
+      document.getElementById("historyFilterEndDate").value = "";
+      document.getElementById("historyFilterMode").value = "";
+      document.getElementById("historyFilterStatus").value = "";
+      renderInspectionHistory();
+    });
+
+    // 엑셀 내보내기 버튼 이벤트
+    document.getElementById("btnExportData").addEventListener("click", exportRecordsToCSV);
+    document.getElementById("btnDownloadHistoryCSV").addEventListener("click", exportRecordsToCSV);
+    document.getElementById("btnOpenSettings").addEventListener("click", () => switchMode("master"));
+
+    // 탭 클릭 바인딩
+    document.querySelectorAll(".mode-tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => switchMode(btn.getAttribute("data-mode")));
+    });
+
+    // 기준정보 서브탭 바인딩
+    document.getElementById("btnSubTabEquipMaster")?.addEventListener("click", () => switchMasterSubTab("equip"));
+    document.getElementById("btnSubTabZoneMaster")?.addEventListener("click", () => switchMasterSubTab("zone"));
+    document.getElementById("btnSubTabTplMaster")?.addEventListener("click", () => switchMasterSubTab("tpl"));
+    document.getElementById("btnSubTabGoogleSync")?.addEventListener("click", () => switchMasterSubTab("sync"));
+    document.getElementById("masterEquipSearchInput")?.addEventListener("input", renderMasterViews);
+
+    // 구글 시트 연동 이벤트 리스너
+    document.getElementById("btnSaveGoogleUrl")?.addEventListener("click", () => {
+      const val = document.getElementById("googleScriptUrlInput")?.value || "";
+      setGoogleScriptUrl(val);
+      showToast("구글 앱스 스크립트 URL이 저장되었습니다.");
+    });
+
+    document.getElementById("btnFetchFromGoogle")?.addEventListener("click", syncFromGoogleSheets);
+    document.getElementById("btnPushToGoogle")?.addEventListener("click", syncToGoogleSheets);
+
+    // 가이드 모달 이벤트
+    document.getElementById("btnOpenGasGuideModal")?.addEventListener("click", () => {
+      document.getElementById("gasGuideModal")?.classList.remove("hidden");
+      document.getElementById("gasGuideModal")?.classList.add("flex");
+    });
+
+    document.getElementById("btnCloseGasGuideModal")?.addEventListener("click", () => {
+      document.getElementById("gasGuideModal")?.classList.add("hidden");
+      document.getElementById("gasGuideModal")?.classList.remove("flex");
+    });
+
+    document.getElementById("btnDismissGasGuideModal")?.addEventListener("click", () => {
+      document.getElementById("gasGuideModal")?.classList.add("hidden");
+      document.getElementById("gasGuideModal")?.classList.remove("flex");
+    });
+
+    document.getElementById("btnCopyGasCode")?.addEventListener("click", () => {
+      const snippet = document.getElementById("gasCodeSnippet")?.innerText || "";
+      const tempArea = document.createElement("textarea");
+      tempArea.value = snippet;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempArea);
+      showToast("Apps Script 코드가 클립보드에 복사되었습니다!");
+    });
+
+    // 네트워크 상태 감지
+    window.addEventListener("online", () => {
+      document.getElementById("netStatusText").textContent = "온라인";
+      document.getElementById("netStatusBadge").className = "flex items-center space-x-1 px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-emerald-50 border border-emerald-200 text-emerald-700";
+    });
+    window.addEventListener("offline", () => {
+      document.getElementById("netStatusText").textContent = "오프라인(저장됨)";
+      document.getElementById("netStatusBadge").className = "flex items-center space-x-1 px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-amber-50 border border-amber-200 text-amber-700";
+    });
+
+    window.onload = function() {
+      // 저장된 구글 스크립트 URL 복원
+      const savedGoogleUrl = getGoogleScriptUrl();
+      const googleInput = document.getElementById("googleScriptUrlInput");
+      if (googleInput && savedGoogleUrl) googleInput.value = savedGoogleUrl;
+
+      const lastSync = localStorage.getItem("SAFETYCHECK_GOOGLE_LAST_SYNC");
+      if (lastSync && document.getElementById("lastGoogleSyncTime")) {
+        document.getElementById("lastGoogleSyncTime").textContent = lastSync;
+      }
+
+      // 설비 기준정보를 바탕으로 Zone 및 Area 자동 산입
+      deriveZonesAndAreasFromEquips();
+
+      renderEquipAreaChips();
+      populateEquipDropdownFilters();
+      renderEquipCards();
+      renderAreaCards();
+      renderZoneCards();
+      updateStatusMetrics();
+    };
+  </script>
+</body>
+</html>
