@@ -160,7 +160,7 @@
       </div>
     </section>
 
-    <!-- 점검 진행 현황 대시보드 카드 -->
+    <!-- 점검 진행 현황 대시보드 카드 (우측 상단 양호/이상/미점검 클릭 시 즉시 필터링!) -->
     <section class="bg-white rounded-2xl p-3.5 sm:p-4 shadow-xs border border-slate-200/90">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div class="space-y-1">
@@ -175,26 +175,37 @@
           </div>
         </div>
         
-        <!-- 통계 메트릭 배지 -->
-        <div class="grid grid-cols-3 sm:flex sm:items-center gap-1.5 sm:gap-3 pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-100 text-center sm:text-left">
-          <div class="px-2.5 py-1.5 rounded-xl bg-emerald-50/70 border border-emerald-200/60 flex flex-col sm:flex-row sm:items-center sm:space-x-1.5">
-            <span class="text-[10px] text-slate-500 sm:text-slate-600 font-semibold flex items-center justify-center gap-1">
-              <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span> 양호
+        <!-- 원터치 상태 필터링 버튼 (양호, 이상, 미점검 클릭 시 해당 목록만 즉시 추출) -->
+        <div class="grid grid-cols-3 sm:flex sm:items-center gap-1.5 sm:gap-2.5 pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+          <!-- 1. 양호 필터 버튼 -->
+          <button type="button" id="btnFilterPass" title="클릭하여 [양호] 완료 설비만 보기"
+            class="stat-filter-btn group px-3 py-2 rounded-xl bg-emerald-50/80 hover:bg-emerald-100/80 border border-emerald-200 text-slate-700 transition-all flex flex-col sm:flex-row items-center sm:space-x-2 text-center sm:text-left cursor-pointer active:scale-95">
+            <span class="text-[11px] font-bold text-emerald-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-check text-emerald-600 text-xs group-hover:scale-110 transition-transform"></i>
+              <span>양호</span>
             </span>
             <span id="statNormalCount" class="text-xs sm:text-sm text-emerald-700 font-black font-mono">0</span>
-          </div>
-          <div class="px-2.5 py-1.5 rounded-xl bg-rose-50/70 border border-rose-200/60 flex flex-col sm:flex-row sm:items-center sm:space-x-1.5">
-            <span class="text-[10px] text-slate-500 sm:text-slate-600 font-semibold flex items-center justify-center gap-1">
-              <span class="w-2 h-2 rounded-full bg-rose-500 shrink-0"></span> 이상
+          </button>
+
+          <!-- 2. 이상 필터 버튼 -->
+          <button type="button" id="btnFilterIssue" title="클릭하여 [이상] 발생 설비만 보기"
+            class="stat-filter-btn group px-3 py-2 rounded-xl bg-rose-50/80 hover:bg-rose-100/80 border border-rose-200 text-slate-700 transition-all flex flex-col sm:flex-row items-center sm:space-x-2 text-center sm:text-left cursor-pointer active:scale-95">
+            <span class="text-[11px] font-bold text-rose-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-exclamation text-rose-600 text-xs group-hover:scale-110 transition-transform"></i>
+              <span>이상</span>
             </span>
             <span id="statIssueCount" class="text-xs sm:text-sm text-rose-700 font-black font-mono">0</span>
-          </div>
-          <div class="px-2.5 py-1.5 rounded-xl bg-slate-100/80 border border-slate-200/70 flex flex-col sm:flex-row sm:items-center sm:space-x-1.5">
-            <span class="text-[10px] text-slate-500 sm:text-slate-600 font-semibold flex items-center justify-center gap-1">
-              <span class="w-2 h-2 rounded-full bg-slate-400 shrink-0"></span> 미점검
+          </button>
+
+          <!-- 3. 미점검 필터 버튼 -->
+          <button type="button" id="btnFilterPending" title="클릭하여 [미점검] 설비만 보기"
+            class="stat-filter-btn group px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200/90 border border-slate-300/80 text-slate-700 transition-all flex flex-col sm:flex-row items-center sm:space-x-2 text-center sm:text-left cursor-pointer active:scale-95">
+            <span class="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+              <i class="fa-solid fa-hourglass-half text-amber-500 text-xs group-hover:scale-110 transition-transform"></i>
+              <span>미점검</span>
             </span>
-            <span id="statPendingCount" class="text-xs sm:text-sm text-slate-700 font-black font-mono">0</span>
-          </div>
+            <span id="statPendingCount" class="text-xs sm:text-sm text-slate-800 font-black font-mono">0</span>
+          </button>
         </div>
       </div>
 
@@ -210,7 +221,7 @@
       <section class="bg-white rounded-2xl p-3.5 sm:p-4 shadow-xs border border-slate-200/90 space-y-3">
         <!-- 계층형 필터 드롭다운 (MY AREA 드롭다운 통합 + 대분류/세부종류 연동) -->
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2 sm:gap-2.5">
-          <!-- 1. MY AREA 구역 선택 드롭다운 (칩에서 드롭다운으로 전환) -->
+          <!-- 1. MY AREA 구역 선택 드롭다운 -->
           <div class="col-span-2 sm:col-span-1 lg:col-span-1">
             <label class="block text-[10px] sm:text-[11px] font-bold text-rose-700 mb-0.5 flex items-center gap-1">
               <i class="fa-solid fa-location-dot text-rose-500 text-[10px]"></i>
@@ -272,14 +283,19 @@
           </div>
         </div>
 
+        <!-- 하단 필터 상태바 및 현재 적용된 상태 필터 뱃지 -->
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between pt-2 border-t border-slate-100 gap-2">
-          <div class="text-xs text-slate-600 font-semibold flex items-center justify-between sm:justify-start gap-2">
-            <span>조회 장비:</span>
-            <span id="equipFilteredCount" class="px-2.5 py-0.5 bg-rose-50 text-rose-700 rounded-md font-bold font-mono">0개소</span>
+          <div class="text-xs text-slate-600 font-semibold flex items-center justify-between sm:justify-start gap-2 flex-wrap">
+            <div class="flex items-center gap-1.5">
+              <span>조회 장비:</span>
+              <span id="equipFilteredCount" class="px-2.5 py-0.5 bg-rose-50 text-rose-700 rounded-md font-bold font-mono">0개소</span>
+            </div>
+            <!-- 활성화된 상태 필터 표시 뱃지 -->
+            <div id="activeStatusFilterIndicator" class="hidden items-center gap-1.5"></div>
           </div>
           <div class="flex items-center gap-2">
             <button id="btnEquipResetFilter" class="px-3 py-2 text-xs text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl font-semibold transition-colors text-center border border-slate-200 sm:border-transparent">
-              <i class="fa-solid fa-arrow-rotate-left mr-1"></i> 필터 리셋
+              <i class="fa-solid fa-arrow-rotate-left mr-1"></i> 전체 필터 리셋
             </button>
           </div>
         </div>
@@ -638,7 +654,7 @@
       <div class="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs custom-scrollbar">
         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
           <h4 id="modalChecklistTitle" class="font-extrabold text-slate-800 text-xs sm:text-sm">소화기 점검표</h4>
-          <button type="button" id="btnModalSetAllPass" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 rounded-lg text-[11px] font-bold transition-all shadow-2xs flex items-center gap-1">
+          <button type="button" id="btnModalSetAllPass" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 rounded-lg text-[11px] font-bold transition-all shadow-2xs flex items-center gap-1 cursor-pointer">
             <i class="fa-solid fa-check-double text-[10px]"></i>
             <span>전 항목 O 양호</span>
           </button>
@@ -665,14 +681,14 @@
       </div>
 
       <div class="p-3.5 sm:p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-2 shrink-0">
-        <button type="button" id="btnResetModalRecord" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold text-xs transition-colors">
+        <button type="button" id="btnResetModalRecord" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold text-xs transition-colors cursor-pointer">
           점검 취소
         </button>
         <div class="flex items-center gap-2">
-          <button type="button" id="btnCancelModal" class="px-3.5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold text-xs transition-colors">
+          <button type="button" id="btnCancelModal" class="px-3.5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold text-xs transition-colors cursor-pointer">
             닫기
           </button>
-          <button type="button" id="btnSaveModal" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md shadow-emerald-200 transition-all flex items-center gap-1.5">
+          <button type="button" id="btnSaveModal" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md shadow-emerald-200 transition-all flex items-center gap-1.5 cursor-pointer">
             <i class="fa-solid fa-check"></i>
             <span>점검 완료 저장</span>
           </button>
@@ -724,17 +740,17 @@
           <div id="editCategorySubChips" class="flex flex-wrap gap-1.5 p-2 bg-slate-50 rounded-xl border border-slate-200 min-h-[46px]"></div>
           <div class="flex items-center gap-1.5 pt-1">
             <input type="text" id="newSubTypeInput" placeholder="추가할 세부종류명 입력..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <button type="button" id="btnAddSubTypeToEditModal" class="px-3 py-2 bg-indigo-600 text-white rounded-xl font-bold shrink-0 hover:bg-indigo-700">추가</button>
+            <button type="button" id="btnAddSubTypeToEditModal" class="px-3 py-2 bg-indigo-600 text-white rounded-xl font-bold shrink-0 hover:bg-indigo-700 cursor-pointer">추가</button>
           </div>
           <p class="text-[10px] text-slate-400">※ 등록된 세부 종류 칩을 클릭하면 명칭을 수정할 수 있으며, '×'를 누르면 삭제됩니다.</p>
         </div>
       </div>
 
       <div class="p-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
-        <button type="button" id="btnDeleteCategoryGroupInModal" class="text-rose-600 hover:text-rose-800 font-bold text-xs">그룹 삭제</button>
+        <button type="button" id="btnDeleteCategoryGroupInModal" class="text-rose-600 hover:text-rose-800 font-bold text-xs cursor-pointer">그룹 삭제</button>
         <div class="flex items-center gap-2">
-          <button type="button" id="btnCancelCategoryEditModal" class="px-3 py-1.5 bg-slate-200 text-slate-700 rounded-xl font-bold text-xs">취소</button>
-          <button type="button" id="btnSaveCategoryEditModal" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow-xs">저장</button>
+          <button type="button" id="btnCancelCategoryEditModal" class="px-3 py-1.5 bg-slate-200 text-slate-700 rounded-xl font-bold text-xs cursor-pointer">취소</button>
+          <button type="button" id="btnSaveCategoryEditModal" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow-xs cursor-pointer">저장</button>
         </div>
       </div>
     </div>
@@ -786,7 +802,7 @@
         <div class="space-y-2">
           <div class="flex items-center justify-between border-b border-slate-100 pb-1">
             <label class="font-extrabold text-slate-800 text-xs">세부 점검 항목 (Items)</label>
-            <button type="button" id="btnAddTplItemRow" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg font-bold text-[11px] flex items-center gap-1">
+            <button type="button" id="btnAddTplItemRow" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg font-bold text-[11px] flex items-center gap-1 cursor-pointer">
               <i class="fa-solid fa-plus text-[10px]"></i>
               <span>+ 항목 추가</span>
             </button>
@@ -800,16 +816,16 @@
           <div id="editTplQuickNotesChips" class="flex flex-wrap gap-1.5 p-2 bg-slate-50 rounded-xl border border-slate-200 min-h-[38px]"></div>
           <div class="flex items-center gap-1.5">
             <input type="text" id="newQuickNoteInput" placeholder="새 특이사항 태그 입력..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <button type="button" id="btnAddQuickNoteToTpl" class="px-3 py-2 bg-slate-800 text-white rounded-xl font-bold shrink-0 hover:bg-slate-900">추가</button>
+            <button type="button" id="btnAddQuickNoteToTpl" class="px-3 py-2 bg-slate-800 text-white rounded-xl font-bold shrink-0 hover:bg-slate-900 cursor-pointer">추가</button>
           </div>
         </div>
       </div>
 
       <div class="p-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
-        <button type="button" id="btnDeleteTplInModal" class="text-rose-600 hover:text-rose-800 font-bold text-xs">점검표 삭제</button>
+        <button type="button" id="btnDeleteTplInModal" class="text-rose-600 hover:text-rose-800 font-bold text-xs cursor-pointer">점검표 삭제</button>
         <div class="flex items-center gap-2">
-          <button type="button" id="btnCancelTemplateEditModal" class="px-3 py-1.5 bg-slate-200 text-slate-700 rounded-xl font-bold text-xs">취소</button>
-          <button type="button" id="btnSaveTemplateEditModal" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow-xs">점검표 저장</button>
+          <button type="button" id="btnCancelTemplateEditModal" class="px-3 py-1.5 bg-slate-200 text-slate-700 rounded-xl font-bold text-xs cursor-pointer">취소</button>
+          <button type="button" id="btnSaveTemplateEditModal" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow-xs cursor-pointer">점검표 저장</button>
         </div>
       </div>
     </div>
@@ -831,8 +847,8 @@
         <p id="adminPinError" class="text-[11px] text-rose-600 font-bold mt-1.5 hidden">비밀번호가 일치하지 않습니다.</p>
       </div>
       <div class="grid grid-cols-2 gap-2 pt-1">
-        <button id="btnCancelAdminPin" class="py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl">취소</button>
-        <button id="btnConfirmAdminPin" class="py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-md shadow-rose-200">인증 확인</button>
+        <button id="btnCancelAdminPin" class="py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer">취소</button>
+        <button id="btnConfirmAdminPin" class="py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-md shadow-rose-200 cursor-pointer">인증 확인</button>
       </div>
     </div>
   </div>
@@ -1049,6 +1065,7 @@
     let isMasterUnlocked = false;
     let selectedArea = "";
     let selectedDept = "";
+    let selectedStatusFilter = ""; // "", "PASS", "ISSUE", "PENDING"
     
     // 점검자 기본 프로필
     let currentInspectorProfile = {
@@ -1257,7 +1274,7 @@
 
       const notesContainer = document.getElementById("modalQuickNotesContainer");
       notesContainer.innerHTML = (tpl.quickNotes || []).map(text => `
-        <button type="button" class="btn-quick-note text-[10px] px-2 py-0.5 rounded-md font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200" data-text="${text}">
+        <button type="button" class="btn-quick-note text-[10px] px-2 py-0.5 rounded-md font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 cursor-pointer" data-text="${text}">
           + ${text}
         </button>
       `).join('');
@@ -1301,13 +1318,13 @@
               </span>
             </div>
             <div class="grid grid-cols-3 sm:flex items-center gap-1 shrink-0 w-full sm:w-auto pt-1 sm:pt-0">
-              <button type="button" class="chk-status-btn py-1.5 sm:py-1 px-2 text-xs font-bold rounded-lg border transition-all text-center ${isPass ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'}" data-item-id="${item.id}" data-val="O">
+              <button type="button" class="chk-status-btn py-1.5 sm:py-1 px-2 text-xs font-bold rounded-lg border transition-all text-center cursor-pointer ${isPass ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'}" data-item-id="${item.id}" data-val="O">
                 O 양호
               </button>
-              <button type="button" class="chk-status-btn py-1.5 sm:py-1 px-2 text-xs font-bold rounded-lg border transition-all text-center ${isWarn ? 'bg-amber-500 text-white border-amber-500 shadow-2xs' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'}" data-item-id="${item.id}" data-val="△">
+              <button type="button" class="chk-status-btn py-1.5 sm:py-1 px-2 text-xs font-bold rounded-lg border transition-all text-center cursor-pointer ${isWarn ? 'bg-amber-500 text-white border-amber-500 shadow-2xs' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'}" data-item-id="${item.id}" data-val="△">
                 △ 검토
               </button>
-              <button type="button" class="chk-status-btn py-1.5 sm:py-1 px-2 text-xs font-bold rounded-lg border transition-all text-center ${isFail ? 'bg-rose-600 text-white border-rose-600 shadow-2xs' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'}" data-item-id="${item.id}" data-val="X">
+              <button type="button" class="chk-status-btn py-1.5 sm:py-1 px-2 text-xs font-bold rounded-lg border transition-all text-center cursor-pointer ${isFail ? 'bg-rose-600 text-white border-rose-600 shadow-2xs' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'}" data-item-id="${item.id}" data-val="X">
                 X 불량
               </button>
             </div>
@@ -1335,6 +1352,14 @@
       const search = document.getElementById("equipFilterSearch")?.value.trim().toLowerCase() || "";
 
       return equipMasterList.filter(item => {
+        // 1. 상태 필터 (대시보드 양호/이상/미점검 클릭 연동)
+        if (selectedStatusFilter) {
+          const rec = inspectionRecords[`EQUIP_${item.code}`];
+          if (selectedStatusFilter === "PENDING" && rec) return false;
+          if (selectedStatusFilter === "PASS" && (!rec || rec.status !== "PASS")) return false;
+          if (selectedStatusFilter === "ISSUE" && (!rec || rec.status !== "ISSUE")) return false;
+        }
+
         const itemMajor = item.majorCategory || "소화설비";
         if (areaVal && item.area !== areaVal) return false;
         if (majorCat && itemMajor !== majorCat) return false;
@@ -1433,6 +1458,77 @@
       }
     }
 
+    function updateActiveStatusFilterIndicator() {
+      const container = document.getElementById("activeStatusFilterIndicator");
+      const btnPass = document.getElementById("btnFilterPass");
+      const btnIssue = document.getElementById("btnFilterIssue");
+      const btnPending = document.getElementById("btnFilterPending");
+
+      // 버튼 활성 스타일 리셋
+      if (btnPass) btnPass.className = "stat-filter-btn group px-3 py-2 rounded-xl bg-emerald-50/80 hover:bg-emerald-100 border border-emerald-200 text-slate-700 transition-all flex flex-col sm:flex-row items-center sm:space-x-2 text-center sm:text-left cursor-pointer active:scale-95";
+      if (btnIssue) btnIssue.className = "stat-filter-btn group px-3 py-2 rounded-xl bg-rose-50/80 hover:bg-rose-100 border border-rose-200 text-slate-700 transition-all flex flex-col sm:flex-row items-center sm:space-x-2 text-center sm:text-left cursor-pointer active:scale-95";
+      if (btnPending) btnPending.className = "stat-filter-btn group px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200/90 border border-slate-300/80 text-slate-700 transition-all flex flex-col sm:flex-row items-center sm:space-x-2 text-center sm:text-left cursor-pointer active:scale-95";
+
+      if (!selectedStatusFilter) {
+        container.classList.add("hidden");
+        container.classList.remove("flex");
+        container.innerHTML = "";
+        return;
+      }
+
+      container.classList.remove("hidden");
+      container.classList.add("flex");
+
+      if (selectedStatusFilter === "PASS") {
+        if (btnPass) btnPass.className = "stat-filter-btn group px-3 py-2 rounded-xl bg-emerald-600 text-white border border-emerald-700 shadow-md ring-2 ring-emerald-400 transition-all flex flex-col sm:flex-row items-center sm:space-x-2 text-center sm:text-left cursor-pointer";
+        container.innerHTML = `
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs">
+            <i class="fa-solid fa-circle-check text-emerald-600"></i>
+            <span>양호 완료만 필터 중</span>
+            <button type="button" id="btnClearStatusFilterBadge" class="hover:text-emerald-950 font-black ml-1 text-sm">&times;</button>
+          </span>
+        `;
+      } else if (selectedStatusFilter === "ISSUE") {
+        if (btnIssue) btnIssue.className = "stat-filter-btn group px-3 py-2 rounded-xl bg-rose-600 text-white border border-rose-700 shadow-md ring-2 ring-rose-400 transition-all flex flex-col sm:flex-row items-center sm:space-x-2 text-center sm:text-left cursor-pointer";
+        container.innerHTML = `
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300 shadow-2xs">
+            <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
+            <span>이상 발생만 필터 중</span>
+            <button type="button" id="btnClearStatusFilterBadge" class="hover:text-rose-950 font-black ml-1 text-sm">&times;</button>
+          </span>
+        `;
+      } else if (selectedStatusFilter === "PENDING") {
+        if (btnPending) btnPending.className = "stat-filter-btn group px-3 py-2 rounded-xl bg-slate-800 text-white border border-slate-900 shadow-md ring-2 ring-slate-400 transition-all flex flex-col sm:flex-row items-center sm:space-x-2 text-center sm:text-left cursor-pointer";
+        container.innerHTML = `
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-bold bg-slate-200 text-slate-800 border border-slate-300 shadow-2xs">
+            <i class="fa-solid fa-hourglass-half text-amber-600"></i>
+            <span>미점검 대상만 필터 중</span>
+            <button type="button" id="btnClearStatusFilterBadge" class="hover:text-slate-950 font-black ml-1 text-sm">&times;</button>
+          </span>
+        `;
+      }
+
+      document.getElementById("btnClearStatusFilterBadge")?.addEventListener("click", () => {
+        selectedStatusFilter = "";
+        updateActiveStatusFilterIndicator();
+        renderEquipCards();
+        showToast("상태 필터가 해제되었습니다.");
+      });
+    }
+
+    function toggleStatusFilter(filterType) {
+      if (selectedStatusFilter === filterType) {
+        selectedStatusFilter = "";
+        showToast("상태 필터가 해제되었습니다 (전체 보기).");
+      } else {
+        selectedStatusFilter = filterType;
+        const labels = { PASS: "양호 완료", ISSUE: "이상 발생", PENDING: "미점검 대상" };
+        showToast(`[${labels[filterType]}] 설비만 필터링합니다.`);
+      }
+      updateActiveStatusFilterIndicator();
+      renderEquipCards();
+    }
+
     function renderEquipCards() {
       const container = document.getElementById("equipCardListContainer");
       const list = getFilteredEquips();
@@ -1443,6 +1539,11 @@
           <div class="py-12 sm:py-16 text-center bg-white rounded-2xl border border-slate-200">
             <i class="fa-solid fa-fire-extinguisher text-3xl sm:text-4xl text-slate-300 mb-2"></i>
             <p class="text-xs sm:text-sm font-bold text-slate-600">조회 조건에 해당하는 설비/장비가 없습니다.</p>
+            ${selectedStatusFilter ? `
+              <button type="button" onclick="selectedStatusFilter=''; updateActiveStatusFilterIndicator(); renderEquipCards();" class="mt-3 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold">
+                상태 필터 해제하기
+              </button>
+            ` : ''}
           </div>
         `;
         return;
@@ -1457,7 +1558,7 @@
         let statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200 shrink-0">미점검</span>`;
         let borderClass = "border-slate-200/90 hover:border-slate-300";
         let actionBtn = `
-          <button type="button" class="btn-open-equip-detail shrink-0 px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-1.5 active:scale-95" data-code="${item.code}">
+          <button type="button" class="btn-open-equip-detail shrink-0 px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer" data-code="${item.code}">
             <i class="fa-solid fa-clipboard-check text-xs"></i>
             <span>점검표 작성</span>
           </button>
@@ -1467,7 +1568,7 @@
           statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 shrink-0">양호 완료</span>`;
           borderClass = "border-emerald-300 bg-emerald-50/15";
           actionBtn = `
-            <button type="button" class="btn-open-equip-detail shrink-0 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-1.5 active:scale-95" data-code="${item.code}">
+            <button type="button" class="btn-open-equip-detail shrink-0 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer" data-code="${item.code}">
               <i class="fa-solid fa-check text-xs"></i>
               <span>점검 완료됨</span>
             </button>
@@ -1476,7 +1577,7 @@
           statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-200 shrink-0">이상 발생</span>`;
           borderClass = "border-rose-300 bg-rose-50/15";
           actionBtn = `
-            <button type="button" class="btn-open-equip-detail shrink-0 px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-1.5 active:scale-95" data-code="${item.code}">
+            <button type="button" class="btn-open-equip-detail shrink-0 px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer" data-code="${item.code}">
               <i class="fa-solid fa-triangle-exclamation text-xs"></i>
               <span>이상 수정</span>
             </button>
@@ -1486,7 +1587,7 @@
         const tpl = templateMasterList.find(t => t.id === item.templateId) || templateMasterList[0];
         const itemMajor = item.majorCategory || "소화설비";
 
-        // 데스크톱 Web 고밀도 가로형 + 모바일 최적 반응형 레이아웃
+        // 데스크톱 Web 고밀도 가로형 + 모바일 반응형
         return `
           <div class="equip-card-item cursor-pointer bg-white rounded-2xl p-3 sm:p-4 border ${borderClass} shadow-xs hover:shadow-md transition-all active:scale-[0.99]" data-code="${item.code}">
             <div class="flex items-start sm:items-center justify-between gap-3">
@@ -1528,7 +1629,7 @@
                 ` : ''}
               </div>
 
-              <!-- 우측 액션 버튼 (데스크톱 고밀도 정렬) -->
+              <!-- 우측 액션 버튼 -->
               <div class="shrink-0 flex items-center pt-1 sm:pt-0">
                 ${actionBtn}
               </div>
@@ -1537,7 +1638,6 @@
         `;
       }).join('');
 
-      // 설비 카드 터치 시 즉시 상세 점검표 모달 호출
       container.querySelectorAll(".equip-card-item").forEach(card => {
         card.addEventListener("click", () => {
           const code = card.getAttribute("data-code");
@@ -1628,7 +1728,7 @@
         const isAll = dept === "전체";
         const isSelected = isAll ? !selectedDept : selectedDept === dept;
         return `
-          <button type="button" class="btn-zone-dept-chip px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${isSelected ? 'bg-amber-500 text-white shadow-sm shadow-amber-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}" data-dept="${isAll ? '' : dept}">
+          <button type="button" class="btn-zone-dept-chip px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer ${isSelected ? 'bg-amber-500 text-white shadow-sm shadow-amber-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}" data-dept="${isAll ? '' : dept}">
             ${dept}
           </button>
         `;
@@ -1805,7 +1905,7 @@
           <td class="p-2.5 font-mono text-slate-600">${e.expire || '-'}</td>
           <td class="p-2.5 font-bold text-indigo-600 font-mono">${e.area}</td>
           <td class="p-2.5 text-center">
-            <button type="button" class="btn-delete-master-equip text-rose-600 hover:text-rose-800 font-bold px-2 py-1" data-code="${e.code}">삭제</button>
+            <button type="button" class="btn-delete-master-equip text-rose-600 hover:text-rose-800 font-bold px-2 py-1 cursor-pointer" data-code="${e.code}">삭제</button>
           </td>
         </tr>
       `).join('');
@@ -1841,7 +1941,7 @@
                   ${cat.subTypes.map(st => `
                     <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-semibold border border-slate-200">
                       <span class="cursor-pointer hover:text-indigo-600 btn-quick-rename-subtype" data-cat-id="${cat.id}" data-subtype="${st}" title="클릭하여 이름 수정">${st}</span>
-                      <button type="button" class="hover:text-rose-600 text-slate-400 font-bold btn-quick-delete-subtype" data-cat-id="${cat.id}" data-subtype="${st}" title="삭제">&times;</button>
+                      <button type="button" class="hover:text-rose-600 text-slate-400 font-bold btn-quick-delete-subtype cursor-pointer" data-cat-id="${cat.id}" data-subtype="${st}" title="삭제">&times;</button>
                     </span>
                   `).join('')}
                 </div>
@@ -1849,8 +1949,8 @@
               <td class="p-2.5 text-indigo-600 font-semibold">${tpl ? tpl.name : '-'}</td>
               <td class="p-2.5 font-mono font-bold text-slate-700">${matchCount}대</td>
               <td class="p-2.5 text-center whitespace-nowrap">
-                <button type="button" class="btn-edit-category-group text-indigo-600 hover:underline font-bold mr-2" data-id="${cat.id}">그룹수정</button>
-                <button type="button" class="btn-delete-category-group text-rose-600 hover:underline font-bold" data-id="${cat.id}">삭제</button>
+                <button type="button" class="btn-edit-category-group text-indigo-600 hover:underline font-bold mr-2 cursor-pointer" data-id="${cat.id}">그룹수정</button>
+                <button type="button" class="btn-delete-category-group text-rose-600 hover:underline font-bold cursor-pointer" data-id="${cat.id}">삭제</button>
               </td>
             </tr>
           `;
@@ -1927,7 +2027,7 @@
           <td class="p-2.5 text-slate-600">${z.facility} ${z.floor}</td>
           <td class="p-2.5 font-bold text-amber-700">${z.dept}</td>
           <td class="p-2.5 text-center">
-            <button type="button" class="btn-edit-zone-dept text-indigo-600 hover:underline font-bold" data-id="${z.id}">부서변경</button>
+            <button type="button" class="btn-edit-zone-dept text-indigo-600 hover:underline font-bold cursor-pointer" data-id="${z.id}">부서변경</button>
           </td>
         </tr>
       `).join('');
@@ -1973,10 +2073,10 @@
               </ol>
             </div>
             <div class="pt-2 border-t border-slate-200 flex items-center justify-end gap-2">
-              <button type="button" class="btn-clone-tpl px-2.5 py-1 text-slate-600 hover:text-slate-900 bg-white border border-slate-200 rounded-lg text-xs font-bold" data-id="${tpl.id}">
+              <button type="button" class="btn-clone-tpl px-2.5 py-1 text-slate-600 hover:text-slate-900 bg-white border border-slate-200 rounded-lg text-xs font-bold cursor-pointer" data-id="${tpl.id}">
                 복제
               </button>
-              <button type="button" class="btn-edit-tpl px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-2xs" data-id="${tpl.id}">
+              <button type="button" class="btn-edit-tpl px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-2xs cursor-pointer" data-id="${tpl.id}">
                 수정 / 항목관리
               </button>
             </div>
@@ -2054,7 +2154,7 @@
       container.innerHTML = currentCategoryModalSubs.map((st, i) => `
         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-800 font-bold text-xs">
           <span class="cursor-pointer hover:underline btn-edit-sub-inline" data-idx="${i}">${st}</span>
-          <button type="button" class="btn-del-sub-inline text-indigo-400 hover:text-rose-600 font-bold" data-idx="${i}">&times;</button>
+          <button type="button" class="btn-del-sub-inline text-indigo-400 hover:text-rose-600 font-bold cursor-pointer" data-idx="${i}">&times;</button>
         </span>
       `).join('');
 
@@ -2124,7 +2224,7 @@
       subContainer.innerHTML = allSubTypes.map(st => {
         const isChecked = currentTplAppliedSubTypes.includes(st);
         return `
-          <button type="button" class="btn-toggle-tpl-sub px-2.5 py-1 rounded-lg text-xs font-bold border transition-all ${isChecked ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'}" data-subtype="${st}">
+          <button type="button" class="btn-toggle-tpl-sub px-2.5 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer ${isChecked ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'}" data-subtype="${st}">
             <i class="fa-solid ${isChecked ? 'fa-check' : 'fa-plus'} text-[10px] mr-1"></i>${st}
           </button>
         `;
@@ -2160,7 +2260,7 @@
         <div class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-xl">
           <span class="font-mono text-slate-400 font-bold text-xs w-5 text-center">${idx + 1}.</span>
           <input type="text" class="input-tpl-item-title flex-1 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500" data-idx="${idx}" value="${it.title.replace(/"/g, '&quot;')}">
-          <button type="button" class="btn-del-tpl-item text-slate-400 hover:text-rose-600 p-1.5" data-idx="${idx}" title="삭제">
+          <button type="button" class="btn-del-tpl-item text-slate-400 hover:text-rose-600 p-1.5 cursor-pointer" data-idx="${idx}" title="삭제">
             <i class="fa-solid fa-trash-can"></i>
           </button>
         </div>
@@ -2191,7 +2291,7 @@
       container.innerHTML = currentTplQuickNotes.map((qn, i) => `
         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-200/80 text-slate-800 font-bold text-xs">
           <span>${qn}</span>
-          <button type="button" class="btn-del-qn text-slate-400 hover:text-rose-600 font-bold" data-idx="${i}">&times;</button>
+          <button type="button" class="btn-del-qn text-slate-400 hover:text-rose-600 font-bold cursor-pointer" data-idx="${i}">&times;</button>
         </span>
       `).join('');
 
@@ -2586,11 +2686,18 @@
         }
       });
 
-      if (mode === "equip") renderEquipCards();
-      else if (mode === "area") renderAreaCards();
-      else if (mode === "zone") renderZoneCards();
-      else if (mode === "history") renderInspectionHistory();
-      else if (mode === "master") renderMasterViews();
+      if (mode === "equip") {
+        updateActiveStatusFilterIndicator();
+        renderEquipCards();
+      } else if (mode === "area") {
+        renderAreaCards();
+      } else if (mode === "zone") {
+        renderZoneCards();
+      } else if (mode === "history") {
+        renderInspectionHistory();
+      } else if (mode === "master") {
+        renderMasterViews();
+      }
 
       updateStatusMetrics();
     }
@@ -2875,9 +2982,15 @@
       }
     });
 
+    // 상단 대시보드 양호 / 이상 / 미점검 버튼 클릭 이벤트 연결
+    document.getElementById("btnFilterPass")?.addEventListener("click", () => toggleStatusFilter("PASS"));
+    document.getElementById("btnFilterIssue")?.addEventListener("click", () => toggleStatusFilter("ISSUE"));
+    document.getElementById("btnFilterPending")?.addEventListener("click", () => toggleStatusFilter("PENDING"));
+
     // 필터 리셋 버튼
     document.getElementById("btnEquipResetFilter").addEventListener("click", () => {
       selectedArea = "";
+      selectedStatusFilter = "";
       if (document.getElementById("equipFilterArea")) document.getElementById("equipFilterArea").value = "";
       if (document.getElementById("equipFilterMajorCat")) document.getElementById("equipFilterMajorCat").value = "";
       if (document.getElementById("equipFilterCategory")) document.getElementById("equipFilterCategory").value = "";
@@ -2886,8 +2999,10 @@
       if (document.getElementById("equipFilterRoom")) document.getElementById("equipFilterRoom").value = "";
       if (document.getElementById("equipFilterSearch")) document.getElementById("equipFilterSearch").value = "";
       populateEquipDropdownFilters();
+      updateActiveStatusFilterIndicator();
       renderEquipCards();
       updateStatusMetrics();
+      showToast("모든 검색 및 상태 필터가 초기화되었습니다.");
     });
 
     // MY AREA 드롭다운 변경 이벤트
@@ -3034,6 +3149,7 @@
       deriveZonesAndAreasFromEquips();
 
       populateEquipDropdownFilters();
+      updateActiveStatusFilterIndicator();
       renderEquipCards();
       renderAreaCards();
       renderZoneCards();
