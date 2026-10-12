@@ -96,7 +96,7 @@
         <button id="btnExportData" title="전체 점검결과 CSV 다운로드" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors">
           <i class="fa-solid fa-file-excel text-sm sm:text-base text-emerald-600"></i>
         </button>
-        <button id="btnOpenSettings" title="시스템 및 환경설정 관리" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors">
+        <button id="btnOpenSettings" title="기준정보 및 환경설정 관리 (관리자 PIN 3333)" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors">
           <i class="fa-solid fa-gear text-sm sm:text-base"></i>
         </button>
       </div>
@@ -275,7 +275,7 @@
         </div>
       </section>
 
-      <!-- 장비 카드 리스트 -->
+      <!-- 장비 카드 리스트 (터치 시 상세 점검표 팝업) -->
       <section id="equipCardListContainer" class="space-y-2.5 sm:space-y-3 pb-24"></section>
     </div>
 
@@ -288,7 +288,7 @@
               <i class="fa-solid fa-map-location-dot text-indigo-600"></i>
               <span>MY AREA 순찰 점검 (구역별 특화 점검표)</span>
             </h2>
-            <p class="text-xs text-slate-500">구역 카드를 터치하여 해당 구역 전용 방화 순찰 점검표를 확인 후 제출합니다.</p>
+            <p class="text-xs text-slate-500">구역 카드를 터치하여 해당 구역 전용 방화 순찰 점검표를 확인 후 저장합니다.</p>
           </div>
         </div>
 
@@ -393,7 +393,7 @@
       </section>
     </div>
 
-    <!-- ==================== 기준정보 마스터 관리 뷰 ==================== -->
+    <!-- ==================== 기준정보 마스터 관리 뷰 (관리자 전용) ==================== -->
     <div id="viewMasterSection" class="hidden space-y-3.5 sm:space-y-4 flex flex-col flex-1">
       <section class="bg-white rounded-2xl p-3.5 sm:p-4 shadow-xs border border-slate-200/90 space-y-3">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-100 pb-2.5">
@@ -402,14 +402,14 @@
               <i class="fa-solid fa-sliders text-rose-600"></i>
               <span>기준정보 및 템플릿 마스터 관리 (관리자 모드)</span>
             </h2>
-            <p class="text-xs text-slate-500">설비 등록, Zone 부서 위임 매핑, 점검표 템플릿 항목을 직접 편집합니다.</p>
+            <p class="text-xs text-slate-500">설비 등록, 분류 체계, Zone 부서 위임, 점검표 템플릿 제작 및 수정을 직접 수행합니다.</p>
           </div>
           <button id="btnLockMaster" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 self-start sm:self-auto">
             <i class="fa-solid fa-arrow-left mr-1"></i> 점검 화면으로 나가기
           </button>
         </div>
 
-        <!-- 기준정보 서브 탭 -->
+        <!-- 기준정보 서브 탭 5개 -->
         <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-full sm:w-auto overflow-x-auto no-scrollbar">
           <button id="btnSubTabEquipMaster" class="flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all bg-white text-slate-900 shadow-xs border border-slate-200 shrink-0">
             설비/장비 마스터
@@ -421,7 +421,7 @@
             Zone / 부서 매핑
           </button>
           <button id="btnSubTabTplMaster" class="flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-lg transition-all shrink-0">
-            점검표 템플릿
+            점검표 템플릿 관리 📝
           </button>
           <button id="btnSubTabGoogleSync" class="flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-semibold text-emerald-700 hover:text-emerald-900 bg-emerald-50/70 hover:bg-emerald-100/70 rounded-lg transition-all shrink-0 flex items-center gap-1.5">
             <i class="fa-solid fa-sliders text-emerald-600"></i>
@@ -462,7 +462,7 @@
         <div id="subViewCategoryMaster" class="hidden space-y-3">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
-              <p class="text-xs text-slate-500 font-semibold">설비 대분류(소화/경보/피난구조 등)와 세부 설비 종류 체계를 관리합니다.</p>
+              <p class="text-xs text-slate-500 font-semibold">대분류(소화/경보/피난/방호 등)와 세부 종류 목록을 편집합니다. 뱃지 클릭 시 개별 수정 가능합니다.</p>
             </div>
             <button id="btnAddNewCategoryGroup" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-200 flex items-center gap-1">
               <i class="fa-solid fa-plus"></i>
@@ -475,7 +475,7 @@
                 <tr>
                   <th class="p-2.5">대분류 (Major)</th>
                   <th class="p-2.5">분류 그룹명</th>
-                  <th class="p-2.5">포함된 세부 종류 (Sub Types)</th>
+                  <th class="p-2.5">포함된 세부 종류 (Sub Types - 클릭시 이름 수정)</th>
                   <th class="p-2.5">기본 점검표</th>
                   <th class="p-2.5">등록 설비수</th>
                   <th class="p-2.5 text-center">관리</th>
@@ -505,13 +505,22 @@
           </div>
         </div>
 
-        <!-- 5-3. 점검표 템플릿 관리 뷰 -->
+        <!-- 5-4. 점검표 템플릿 관리 뷰 (제작 / 수정 / 삭제 / 설비 매핑) -->
         <div id="subViewTplMaster" class="hidden space-y-3">
-          <p class="text-xs text-slate-500 font-semibold">시스템에 등록된 점검표 템플릿 항목들을 열람 및 관리합니다.</p>
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-100 pb-2">
+            <div>
+              <h3 class="text-xs sm:text-sm font-extrabold text-slate-900">점검표 템플릿 제작 및 관리</h3>
+              <p class="text-[11px] text-slate-500">점검표를 새롭게 제작하거나 항목을 수정하고, 대응할 설비 종류(소화기, 소화전 등)를 지정합니다.</p>
+            </div>
+            <button id="btnCreateNewTemplate" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-200 flex items-center gap-1.5 shrink-0">
+              <i class="fa-solid fa-plus"></i>
+              <span>+ 신규 점검표 제작</span>
+            </button>
+          </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="masterTplContainer"></div>
         </div>
 
-        <!-- 5-4. 구글 시트 연동 관리 뷰 -->
+        <!-- 5-5. 구글 시트 연동 관리 뷰 -->
         <div id="subViewGoogleSync" class="hidden space-y-3.5">
           <div class="p-3.5 bg-emerald-50/60 rounded-xl border border-emerald-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
@@ -618,7 +627,7 @@
 
       <div class="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs custom-scrollbar">
         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-          <h4 id="modalChecklistTitle" class="font-extrabold text-slate-800 text-xs sm:text-sm">소화기 점검표 (소방청 표준 7항목)</h4>
+          <h4 id="modalChecklistTitle" class="font-extrabold text-slate-800 text-xs sm:text-sm">소화기 점검표</h4>
           <button type="button" id="btnModalSetAllPass" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 rounded-lg text-[11px] font-bold transition-all shadow-2xs flex items-center gap-1">
             <i class="fa-solid fa-check-double text-[10px]"></i>
             <span>전 항목 O 양호</span>
@@ -662,6 +671,140 @@
     </div>
   </div>
 
+  <!-- ==================== 설비 분류 그룹 편집 모달 (categoryEditModal) ==================== -->
+  <div id="categoryEditModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl w-full sm:max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="px-4 py-3 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <h3 id="categoryModalTitle" class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
+          <i class="fa-solid fa-folder-tree text-indigo-600"></i>
+          <span>분류 그룹 편집</span>
+        </h3>
+        <button id="btnCloseCategoryEditModal" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="p-4 overflow-y-auto space-y-3 text-xs custom-scrollbar">
+        <input type="hidden" id="editCategoryId">
+        
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">상위 대분류 (Major Category)</label>
+          <input type="text" id="editCategoryMajor" placeholder="예: 소화설비, 경보설비, 피난구조설비" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <div class="flex flex-wrap gap-1 mt-1 text-[10px] text-slate-400">
+            <span>빠른선택:</span>
+            <button type="button" class="btn-quick-major hover:underline text-indigo-600 font-bold" data-major="소화설비">소화설비</button>
+            <button type="button" class="btn-quick-major hover:underline text-indigo-600 font-bold" data-major="경보설비">경보설비</button>
+            <button type="button" class="btn-quick-major hover:underline text-indigo-600 font-bold" data-major="피난구조설비">피난구조설비</button>
+            <button type="button" class="btn-quick-major hover:underline text-indigo-600 font-bold" data-major="방호/환경안전">방호/환경안전</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">분류 그룹명 (Name)</label>
+          <input type="text" id="editCategoryName" placeholder="예: 소화기류, 소화전/호스류" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">기본 연결 점검표 (Default Checklist)</label>
+          <select id="editCategoryTpl" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+        </div>
+
+        <div class="space-y-1.5 pt-1">
+          <label class="block font-bold text-slate-700">포함된 세부 종류 (Sub Types)</label>
+          <div id="editCategorySubChips" class="flex flex-wrap gap-1.5 p-2 bg-slate-50 rounded-xl border border-slate-200 min-h-[46px]"></div>
+          <div class="flex items-center gap-1.5 pt-1">
+            <input type="text" id="newSubTypeInput" placeholder="추가할 세부종류명 입력..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <button type="button" id="btnAddSubTypeToEditModal" class="px-3 py-2 bg-indigo-600 text-white rounded-xl font-bold shrink-0 hover:bg-indigo-700">추가</button>
+          </div>
+          <p class="text-[10px] text-slate-400">※ 등록된 세부 종류 칩을 클릭하면 명칭을 수정할 수 있으며, '×'를 누르면 삭제됩니다.</p>
+        </div>
+      </div>
+
+      <div class="p-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+        <button type="button" id="btnDeleteCategoryGroupInModal" class="text-rose-600 hover:text-rose-800 font-bold text-xs">그룹 삭제</button>
+        <div class="flex items-center gap-2">
+          <button type="button" id="btnCancelCategoryEditModal" class="px-3 py-1.5 bg-slate-200 text-slate-700 rounded-xl font-bold text-xs">취소</button>
+          <button type="button" id="btnSaveCategoryEditModal" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow-xs">저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 점검표 템플릿 제작/편집 모달 (templateEditModal) ==================== -->
+  <div id="templateEditModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl w-full sm:max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      <div class="px-4 py-3 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <h3 id="templateModalTitle" class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
+          <i class="fa-solid fa-list-check text-indigo-600"></i>
+          <span>점검표 템플릿 제작 / 수정</span>
+        </h3>
+        <button id="btnCloseTemplateEditModal" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="p-4 overflow-y-auto space-y-3.5 text-xs custom-scrollbar">
+        <input type="hidden" id="editTplId">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">점검표 명칭 (Template Name)</label>
+            <input type="text" id="editTplName" placeholder="예: 옥내소화전 정기 점검표" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">구분 / 카테고리 (Category Tag)</label>
+            <input type="text" id="editTplCategory" placeholder="예: 소화전, 구역순찰, 피난설비" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+
+        <!-- 대응 설비 세부 종류 매핑 -->
+        <div class="p-2.5 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-1.5">
+          <label class="block font-bold text-indigo-950 flex items-center gap-1">
+            <i class="fa-solid fa-link text-indigo-600"></i>
+            <span>대응 설비 세부 종류 지정 (해당 장비 점검 시 이 점검표 자동 호출)</span>
+          </label>
+          <div id="editTplSubTypesContainer" class="flex flex-wrap gap-1.5 py-1"></div>
+          <div class="flex items-center gap-2 pt-1">
+            <label class="flex items-center gap-1.5 text-[11px] font-bold text-indigo-900 cursor-pointer">
+              <input type="checkbox" id="chkApplyTplToExistingEquips" class="w-3.5 h-3.5 rounded text-indigo-600">
+              <span>현재 등록된 위 해당 설비 원장 데이터에도 이 점검표를 즉시 일괄 적용</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 점검 항목 리스트 편집 -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-1">
+            <label class="font-extrabold text-slate-800 text-xs">세부 점검 항목 (Items)</label>
+            <button type="button" id="btnAddTplItemRow" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg font-bold text-[11px] flex items-center gap-1">
+              <i class="fa-solid fa-plus text-[10px]"></i>
+              <span>+ 항목 추가</span>
+            </button>
+          </div>
+          <div id="editTplItemsContainer" class="space-y-2"></div>
+        </div>
+
+        <!-- 빠른 특이사항 태그 편집 -->
+        <div class="space-y-1.5 pt-1">
+          <label class="block font-bold text-slate-700">점검 시 제공할 빠른 특이사항 메모 태그</label>
+          <div id="editTplQuickNotesChips" class="flex flex-wrap gap-1.5 p-2 bg-slate-50 rounded-xl border border-slate-200 min-h-[38px]"></div>
+          <div class="flex items-center gap-1.5">
+            <input type="text" id="newQuickNoteInput" placeholder="새 특이사항 태그 입력..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <button type="button" id="btnAddQuickNoteToTpl" class="px-3 py-2 bg-slate-800 text-white rounded-xl font-bold shrink-0 hover:bg-slate-900">추가</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+        <button type="button" id="btnDeleteTplInModal" class="text-rose-600 hover:text-rose-800 font-bold text-xs">점검표 삭제</button>
+        <div class="flex items-center gap-2">
+          <button type="button" id="btnCancelTemplateEditModal" class="px-3 py-1.5 bg-slate-200 text-slate-700 rounded-xl font-bold text-xs">취소</button>
+          <button type="button" id="btnSaveTemplateEditModal" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow-xs">점검표 저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== 관리자 비밀번호 인증 모달 ==================== -->
   <div id="adminPinModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-xs w-full p-5 shadow-2xl text-center space-y-4">
@@ -691,12 +834,13 @@
   </div>
 
   <script>
-    // 점검표 템플릿 마스터
-    const TEMPLATES_MASTER = [
+    // 점검표 템플릿 마스터 초기 정의
+    const DEFAULT_TEMPLATES = [
       {
         id: "TPL_FIRE_EXT",
         name: "소화기 점검표 (소방청 표준 7항목)",
         category: "소화기",
+        appliedSubTypes: ["분말 소화기", "청정 소화기", "금속 소화기", "CO2 소화기", "강화액 소화기"],
         items: [
           { id: "FE_1", title: "거주자 등이 손쉽게 사용할 수 있는 장소에 설치되어 있는지 여부" },
           { id: "FE_2", title: "구획된 거실(바닥면적 33㎡ 이상) 마다 소화기 설치 여부" },
@@ -712,6 +856,7 @@
         id: "TPL_HYDRANT",
         name: "소화전 점검표 (옥내/상수도 5항목)",
         category: "소화전",
+        appliedSubTypes: ["옥내소화전", "옥외소화전", "상수도소화전", "방수구"],
         items: [
           { id: "HY_1", title: "소화전함 전면 적재물 유무 및 개폐 방해요소 없음" },
           { id: "HY_2", title: "호스 및 노즐 결합 상태 및 노후/파손 여부" },
@@ -725,6 +870,7 @@
         id: "TPL_AREA_CLEAN",
         name: "MY AREA 순찰 점검표 (클린룸/생산 구역)",
         category: "구역순찰",
+        appliedSubTypes: ["방화셔터", "방화문", "정전기접지기"],
         items: [
           { id: "AC_1", title: "비상탈출로 및 스막룸 피난경로 장애물 적치 여부" },
           { id: "AC_2", title: "방화셔터 및 방화문 연동선 상의 간섭 물품 없음" },
@@ -737,6 +883,7 @@
         id: "TPL_AREA_UTIL",
         name: "MY AREA 순찰 점검표 (유틸리티/고위험 구역)",
         category: "구역순찰",
+        appliedSubTypes: ["비상샤워기", "가스누설경보기"],
         items: [
           { id: "AU_1", title: "변전/기계/발전기실 가스계 소화설비 수동조작함 상태" },
           { id: "AU_2", title: "오일/연료/화학물질 누유·누출 여부 및 흡착포 비치" },
@@ -749,6 +896,7 @@
         id: "TPL_AREA_OFFICE",
         name: "MY AREA 순찰 점검표 (사무/복지/공용 구역)",
         category: "구역순찰",
+        appliedSubTypes: ["유도등", "비상조명등"],
         items: [
           { id: "AO_1", title: "복도 및 주계단실 방화문 상시 닫힘 상태 유지" },
           { id: "AO_2", title: "피난유도등 정상 점등 및 유도선 훼손 유무" },
@@ -761,6 +909,7 @@
         id: "TPL_ZONE_DAILY",
         name: "MY ZONE 부서 자율 화재예방 점검표",
         category: "부서자율",
+        appliedSubTypes: [],
         items: [
           { id: "ZD_1", title: "소화기 전면 1m 이내 물품 적치 금지 준수" },
           { id: "ZD_2", title: "퇴근 전 미사용 전기/설비 플러그 차단 상태" },
@@ -912,22 +1061,20 @@
       inspectionRecords = {};
     }
 
-    // 설비 마스터 로드
-    let equipMasterList = [];
+    // 점검표 템플릿 마스터 로드
+    let templateMasterList = [];
     try {
-      const savedEquips = localStorage.getItem("SAFETYCHECK_EQUIPS_V3");
-      if (savedEquips) equipMasterList = JSON.parse(savedEquips);
-      else equipMasterList = RAW_EQUIP_DATA.map(item => ({ 
-        ...item, 
-        majorCategory: item.majorCategory || (item.name.includes("소화기") || item.name.includes("소화전") ? "소화설비" : "소화설비"),
-        templateId: "TPL_FIRE_EXT" 
-      }));
+      const savedTpls = localStorage.getItem("SAFETYCHECK_TEMPLATES_V4");
+      if (savedTpls) templateMasterList = JSON.parse(savedTpls);
+      else templateMasterList = DEFAULT_TEMPLATES;
     } catch(e) {
-      equipMasterList = RAW_EQUIP_DATA.map(item => ({ 
-        ...item, 
-        majorCategory: item.majorCategory || "소화설비",
-        templateId: "TPL_FIRE_EXT" 
-      }));
+      templateMasterList = DEFAULT_TEMPLATES;
+    }
+
+    function saveTemplateMaster() {
+      try {
+        localStorage.setItem("SAFETYCHECK_TEMPLATES_V4", JSON.stringify(templateMasterList));
+      } catch(e) {}
     }
 
     // 설비 분류 체계 마스터 로드
@@ -944,6 +1091,24 @@
       try {
         localStorage.setItem("SAFETYCHECK_CATEGORIES_V3", JSON.stringify(categoryHierarchyList));
       } catch(e) {}
+    }
+
+    // 설비 마스터 로드
+    let equipMasterList = [];
+    try {
+      const savedEquips = localStorage.getItem("SAFETYCHECK_EQUIPS_V3");
+      if (savedEquips) equipMasterList = JSON.parse(savedEquips);
+      else equipMasterList = RAW_EQUIP_DATA.map(item => ({ 
+        ...item, 
+        majorCategory: item.majorCategory || "소화설비",
+        templateId: "TPL_FIRE_EXT" 
+      }));
+    } catch(e) {
+      equipMasterList = RAW_EQUIP_DATA.map(item => ({ 
+        ...item, 
+        majorCategory: item.majorCategory || "소화설비",
+        templateId: "TPL_FIRE_EXT" 
+      }));
     }
 
     // Zone 부서 매핑 로드
@@ -1051,7 +1216,7 @@
 
     function openInspectionModal(mode, targetId, title, sub, tplId) {
       const modal = document.getElementById("inspectionModal");
-      const tpl = TEMPLATES_MASTER.find(t => t.id === tplId) || TEMPLATES_MASTER[0];
+      const tpl = templateMasterList.find(t => t.id === tplId) || templateMasterList[0];
       
       const recordKey = `${mode}_${targetId}`;
       const existing = inspectionRecords[recordKey] || null;
@@ -1159,10 +1324,10 @@
       const search = document.getElementById("equipFilterSearch")?.value.trim().toLowerCase() || "";
 
       return equipMasterList.filter(item => {
-        const itemMajor = item.majorCategory || (item.name.includes("소화") ? "소화설비" : "소화설비");
+        const itemMajor = item.majorCategory || "소화설비";
         if (selectedArea && item.area !== selectedArea) return false;
         if (majorCat && itemMajor !== majorCat) return false;
-        if (category && !item.name.includes(category)) return false;
+        if (category && item.name !== category && !item.name.includes(category)) return false;
         if (facility && item.facility !== facility) return false;
         if (floor && item.floor !== floor) return false;
         if (room && item.room !== room) return false;
@@ -1321,8 +1486,8 @@
           `;
         }
 
-        const tpl = TEMPLATES_MASTER.find(t => t.id === item.templateId) || TEMPLATES_MASTER[0];
-        const itemMajor = item.majorCategory || (item.name.includes("소화") ? "소화설비" : "소화설비");
+        const tpl = templateMasterList.find(t => t.id === item.templateId) || templateMasterList[0];
+        const itemMajor = item.majorCategory || "소화설비";
 
         return `
           <div class="equip-card-item cursor-pointer bg-white rounded-2xl p-3.5 sm:p-4 border ${borderClass} shadow-xs hover:shadow-md transition-all active:scale-[0.99]" data-code="${item.code}">
@@ -1404,7 +1569,7 @@
         }
 
         const equipCount = equipMasterList.filter(e => e.area === area.id).length;
-        const tpl = TEMPLATES_MASTER.find(t => t.id === area.tplId) || TEMPLATES_MASTER[0];
+        const tpl = templateMasterList.find(t => t.id === area.tplId) || templateMasterList[0];
 
         return `
           <div class="area-card-item cursor-pointer bg-white rounded-2xl p-4 border ${borderClass} shadow-xs hover:shadow-md transition-all flex flex-col justify-between" data-id="${area.id}">
@@ -1438,7 +1603,6 @@
         `;
       }).join('');
 
-      // MY AREA 카드 터치 시 모달 호출
       container.querySelectorAll(".area-card-item").forEach(card => {
         card.addEventListener("click", () => {
           const id = card.getAttribute("data-id");
@@ -1527,7 +1691,6 @@
         `;
       }).join('');
 
-      // MY ZONE 카드 터치 시 모달 호출
       container.querySelectorAll(".zone-card-item").forEach(card => {
         card.addEventListener("click", () => {
           const id = card.getAttribute("data-id");
@@ -1616,6 +1779,7 @@
     }
 
     function renderMasterViews() {
+      // 1. 장비 마스터
       const tbodyEquip = document.getElementById("masterEquipTableBody");
       const search = (document.getElementById("masterEquipSearchInput")?.value || "").toLowerCase();
       const filtered = equipMasterList.filter(e => {
@@ -1651,7 +1815,7 @@
         });
       });
 
-      // 설비 분류 체계 마스터 렌더링
+      // 2. 설비 분류 체계 마스터 렌더링
       const tbodyCategory = document.getElementById("masterCategoryTableBody");
       if (tbodyCategory) {
         tbodyCategory.innerHTML = categoryHierarchyList.map(cat => {
@@ -1659,7 +1823,7 @@
             const m = e.majorCategory || "소화설비";
             return m === cat.major && cat.subTypes.some(sub => (e.name || "").includes(sub));
           }).length;
-          const tpl = TEMPLATES_MASTER.find(t => t.id === cat.defaultTpl) || TEMPLATES_MASTER[0];
+          const tpl = templateMasterList.find(t => t.id === cat.defaultTpl) || templateMasterList[0];
 
           return `
             <tr class="hover:bg-slate-50">
@@ -1667,41 +1831,76 @@
               <td class="p-2.5 font-bold text-slate-900">${cat.name}</td>
               <td class="p-2.5">
                 <div class="flex flex-wrap gap-1 max-w-sm">
-                  ${cat.subTypes.map(st => `<span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-semibold">${st}</span>`).join('')}
+                  ${cat.subTypes.map(st => `
+                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-semibold border border-slate-200">
+                      <span class="cursor-pointer hover:text-indigo-600 btn-quick-rename-subtype" data-cat-id="${cat.id}" data-subtype="${st}" title="클릭하여 이름 수정">${st}</span>
+                      <button type="button" class="hover:text-rose-600 text-slate-400 font-bold btn-quick-delete-subtype" data-cat-id="${cat.id}" data-subtype="${st}" title="삭제">&times;</button>
+                    </span>
+                  `).join('')}
                 </div>
               </td>
-              <td class="p-2.5 text-indigo-600 font-semibold">${tpl.name}</td>
+              <td class="p-2.5 text-indigo-600 font-semibold">${tpl ? tpl.name : '-'}</td>
               <td class="p-2.5 font-mono font-bold text-slate-700">${matchCount}대</td>
               <td class="p-2.5 text-center whitespace-nowrap">
-                <button type="button" class="btn-edit-category-sub text-indigo-600 hover:underline font-bold mr-2" data-id="${cat.id}">종류추가</button>
+                <button type="button" class="btn-edit-category-group text-indigo-600 hover:underline font-bold mr-2" data-id="${cat.id}">그룹수정</button>
                 <button type="button" class="btn-delete-category-group text-rose-600 hover:underline font-bold" data-id="${cat.id}">삭제</button>
               </td>
             </tr>
           `;
         }).join('');
 
-        tbodyCategory.querySelectorAll(".btn-edit-category-sub").forEach(btn => {
-          btn.addEventListener("click", () => {
-            const id = btn.getAttribute("data-id");
-            const cat = categoryHierarchyList.find(c => c.id === id);
+        tbodyCategory.querySelectorAll(".btn-quick-rename-subtype").forEach(span => {
+          span.addEventListener("click", () => {
+            const catId = span.getAttribute("data-cat-id");
+            const oldName = span.getAttribute("data-subtype");
+            const cat = categoryHierarchyList.find(c => c.id === catId);
             if (!cat) return;
-            const newSubType = prompt(`[${cat.major} > ${cat.name}]에 추가할 세부 설비 종류명을 입력하세요:`);
-            if (newSubType && newSubType.trim()) {
-              if (!cat.subTypes.includes(newSubType.trim())) {
-                cat.subTypes.push(newSubType.trim());
+            const newName = prompt(`'${oldName}' 종류의 새 명칭을 입력하세요:`, oldName);
+            if (newName && newName.trim() && newName.trim() !== oldName) {
+              const idx = cat.subTypes.indexOf(oldName);
+              if (idx !== -1) {
+                cat.subTypes[idx] = newName.trim();
+                if (confirm(`등록된 기존 설비 중 '${oldName}' 장비의 명칭도 '${newName.trim()}'(으)로 일괄 변경하시겠습니까?`)) {
+                  equipMasterList.forEach(e => {
+                    if (e.name === oldName) e.name = newName.trim();
+                  });
+                  saveEquipMaster();
+                }
                 saveCategoryMaster();
                 populateEquipDropdownFilters();
                 renderMasterViews();
-                showToast(`${newSubType.trim()} 종류가 추가되었습니다.`);
+                renderEquipCards();
+                showToast(`'${oldName}' ➔ '${newName.trim()}' 변경 완료`);
               }
             }
           });
         });
 
+        tbodyCategory.querySelectorAll(".btn-quick-delete-subtype").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const catId = btn.getAttribute("data-cat-id");
+            const subName = btn.getAttribute("data-subtype");
+            const cat = categoryHierarchyList.find(c => c.id === catId);
+            if (!cat) return;
+            if (confirm(`'${subName}' 세부 종류를 삭제하시겠습니까?`)) {
+              cat.subTypes = cat.subTypes.filter(s => s !== subName);
+              saveCategoryMaster();
+              populateEquipDropdownFilters();
+              renderMasterViews();
+              renderEquipCards();
+              showToast(`'${subName}' 삭제 완료`);
+            }
+          });
+        });
+
+        tbodyCategory.querySelectorAll(".btn-edit-category-group").forEach(btn => {
+          btn.addEventListener("click", () => openCategoryEditModal(btn.getAttribute("data-id")));
+        });
+
         tbodyCategory.querySelectorAll(".btn-delete-category-group").forEach(btn => {
           btn.addEventListener("click", () => {
             const id = btn.getAttribute("data-id");
-            if (confirm("해당 분류 그룹을 삭제하시겠습니까?")) {
+            if (confirm("해당 분류 그룹 전체를 삭제하시겠습니까?")) {
               categoryHierarchyList = categoryHierarchyList.filter(c => c.id !== id);
               saveCategoryMaster();
               populateEquipDropdownFilters();
@@ -1712,6 +1911,7 @@
         });
       }
 
+      // 3. Zone 부서 매핑
       const tbodyZone = document.getElementById("masterZoneTableBody");
       tbodyZone.innerHTML = zoneMasterList.map(z => `
         <tr class="hover:bg-slate-50">
@@ -1741,19 +1941,263 @@
         });
       });
 
+      // 4. 점검표 템플릿 마스터 렌더링
       const tplContainer = document.getElementById("masterTplContainer");
-      tplContainer.innerHTML = TEMPLATES_MASTER.map(tpl => `
-        <div class="border border-slate-200 rounded-xl p-3.5 bg-slate-50/50 space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-black text-indigo-700">${tpl.category}</span>
-            <span class="text-[10px] font-mono text-slate-400 font-bold">${tpl.items.length}개 항목</span>
+      tplContainer.innerHTML = templateMasterList.map(tpl => {
+        const assignedEquips = equipMasterList.filter(e => e.templateId === tpl.id).length;
+        const subTypeList = tpl.appliedSubTypes || [];
+
+        return `
+          <div class="border border-slate-200 rounded-xl p-3.5 bg-slate-50/50 space-y-2 flex flex-col justify-between">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-black px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">${tpl.category}</span>
+                <span class="text-[10px] font-mono text-slate-500 font-bold">${tpl.items.length}개 항목 | 적용 설비 ${assignedEquips}대</span>
+              </div>
+              <h4 class="font-extrabold text-slate-900 text-sm">${tpl.name}</h4>
+              ${subTypeList.length > 0 ? `
+                <div class="flex flex-wrap gap-1 text-[10px] text-slate-600">
+                  <span class="font-bold text-indigo-700">대응장비:</span>
+                  ${subTypeList.map(st => `<span class="px-1.5 py-0.2 rounded bg-white border border-slate-200">${st}</span>`).join('')}
+                </div>
+              ` : ''}
+              <ol class="text-xs text-slate-600 space-y-1 list-decimal list-inside bg-white p-2.5 rounded-lg border border-slate-200 max-h-36 overflow-y-auto custom-scrollbar">
+                ${tpl.items.map(it => `<li class="truncate">${it.title}</li>`).join('')}
+              </ol>
+            </div>
+            <div class="pt-2 border-t border-slate-200 flex items-center justify-end gap-2">
+              <button type="button" class="btn-clone-tpl px-2.5 py-1 text-slate-600 hover:text-slate-900 bg-white border border-slate-200 rounded-lg text-xs font-bold" data-id="${tpl.id}">
+                복제
+              </button>
+              <button type="button" class="btn-edit-tpl px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-2xs" data-id="${tpl.id}">
+                수정 / 항목관리
+              </button>
+            </div>
           </div>
-          <h4 class="font-extrabold text-slate-900 text-sm">${tpl.name}</h4>
-          <ol class="text-xs text-slate-600 space-y-1 list-decimal list-inside bg-white p-2.5 rounded-lg border border-slate-200">
-            ${tpl.items.map(it => `<li class="truncate">${it.title}</li>`).join('')}
-          </ol>
+        `;
+      }).join('');
+
+      tplContainer.querySelectorAll(".btn-edit-tpl").forEach(btn => {
+        btn.addEventListener("click", () => openTemplateEditModal(btn.getAttribute("data-id")));
+      });
+
+      tplContainer.querySelectorAll(".btn-clone-tpl").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-id");
+          const target = templateMasterList.find(t => t.id === id);
+          if (!target) return;
+          const newId = "TPL_" + Date.now();
+          const clone = JSON.parse(JSON.stringify(target));
+          clone.id = newId;
+          clone.name = `${target.name} (사본)`;
+          templateMasterList.push(clone);
+          saveTemplateMaster();
+          renderMasterViews();
+          showToast(`'${clone.name}' 복제 완료`);
+        });
+      });
+    }
+
+    let currentCategoryModalSubs = [];
+
+    function openCategoryEditModal(catId) {
+      const modal = document.getElementById("categoryEditModal");
+      const titleElem = document.getElementById("categoryModalTitle");
+      const delBtn = document.getElementById("btnDeleteCategoryGroupInModal");
+      const tplSelect = document.getElementById("editCategoryTpl");
+
+      // 템플릿 드롭다운 채우기
+      tplSelect.innerHTML = templateMasterList.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+
+      if (catId) {
+        const cat = categoryHierarchyList.find(c => c.id === catId);
+        if (!cat) return;
+        document.getElementById("editCategoryId").value = cat.id;
+        document.getElementById("editCategoryMajor").value = cat.major;
+        document.getElementById("editCategoryName").value = cat.name;
+        document.getElementById("editCategoryTpl").value = cat.defaultTpl;
+        currentCategoryModalSubs = [...(cat.subTypes || [])];
+        titleElem.innerHTML = `<i class="fa-solid fa-folder-tree text-indigo-600"></i> <span>분류 그룹 수정</span>`;
+        delBtn.classList.remove("hidden");
+      } else {
+        document.getElementById("editCategoryId").value = "";
+        document.getElementById("editCategoryMajor").value = "소화설비";
+        document.getElementById("editCategoryName").value = "";
+        currentCategoryModalSubs = [];
+        titleElem.innerHTML = `<i class="fa-solid fa-plus text-indigo-600"></i> <span>신규 분류 그룹 등록</span>`;
+        delBtn.classList.add("hidden");
+      }
+
+      renderCategoryModalSubChips();
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeCategoryEditModal() {
+      const modal = document.getElementById("categoryEditModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    function renderCategoryModalSubChips() {
+      const container = document.getElementById("editCategorySubChips");
+      if (currentCategoryModalSubs.length === 0) {
+        container.innerHTML = `<span class="text-slate-400 text-[11px] self-center">세부 종류를 추가하세요.</span>`;
+        return;
+      }
+      container.innerHTML = currentCategoryModalSubs.map((st, i) => `
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-800 font-bold text-xs">
+          <span class="cursor-pointer hover:underline btn-edit-sub-inline" data-idx="${i}">${st}</span>
+          <button type="button" class="btn-del-sub-inline text-indigo-400 hover:text-rose-600 font-bold" data-idx="${i}">&times;</button>
+        </span>
+      `).join('');
+
+      container.querySelectorAll(".btn-del-sub-inline").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const idx = parseInt(btn.getAttribute("data-idx"), 10);
+          currentCategoryModalSubs.splice(idx, 1);
+          renderCategoryModalSubChips();
+        });
+      });
+
+      container.querySelectorAll(".btn-edit-sub-inline").forEach(span => {
+        span.addEventListener("click", () => {
+          const idx = parseInt(span.getAttribute("data-idx"), 10);
+          const old = currentCategoryModalSubs[idx];
+          const next = prompt("세부 종류명을 입력하세요:", old);
+          if (next && next.trim()) {
+            currentCategoryModalSubs[idx] = next.trim();
+            renderCategoryModalSubChips();
+          }
+        });
+      });
+    }
+
+    let currentTplItems = [];
+    let currentTplQuickNotes = [];
+    let currentTplAppliedSubTypes = [];
+
+    function openTemplateEditModal(tplId) {
+      const modal = document.getElementById("templateEditModal");
+      const titleElem = document.getElementById("templateModalTitle");
+      const delBtn = document.getElementById("btnDeleteTplInModal");
+
+      // 시스템에 등록된 모든 세부종류 추출
+      const allSubTypes = [...new Set([
+        ...categoryHierarchyList.flatMap(c => c.subTypes || []),
+        ...equipMasterList.map(e => e.name)
+      ])].filter(Boolean);
+
+      if (tplId) {
+        const tpl = templateMasterList.find(t => t.id === tplId);
+        if (!tpl) return;
+        document.getElementById("editTplId").value = tpl.id;
+        document.getElementById("editTplName").value = tpl.name;
+        document.getElementById("editTplCategory").value = tpl.category || "기타";
+        currentTplItems = JSON.parse(JSON.stringify(tpl.items || []));
+        currentTplQuickNotes = [...(tpl.quickNotes || [])];
+        currentTplAppliedSubTypes = [...(tpl.appliedSubTypes || [])];
+        titleElem.innerHTML = `<i class="fa-solid fa-list-check text-indigo-600"></i> <span>점검표 수정 (${tpl.name})</span>`;
+        delBtn.classList.remove("hidden");
+      } else {
+        document.getElementById("editTplId").value = "";
+        document.getElementById("editTplName").value = "";
+        document.getElementById("editTplCategory").value = "설비점검";
+        currentTplItems = [
+          { id: "ITEM_1", title: "외관 변형 및 손상 유무 확인" },
+          { id: "ITEM_2", title: "정상 가동 및 작동 지시계 상태 확인" }
+        ];
+        currentTplQuickNotes = ["작동 불량", "표지 노후", "전면 장애물"];
+        currentTplAppliedSubTypes = [];
+        titleElem.innerHTML = `<i class="fa-solid fa-plus text-indigo-600"></i> <span>신규 점검표 템플릿 제작</span>`;
+        delBtn.classList.add("hidden");
+      }
+
+      document.getElementById("chkApplyTplToExistingEquips").checked = false;
+
+      // 대응 장비 종류 칩 렌더링
+      const subContainer = document.getElementById("editTplSubTypesContainer");
+      subContainer.innerHTML = allSubTypes.map(st => {
+        const isChecked = currentTplAppliedSubTypes.includes(st);
+        return `
+          <button type="button" class="btn-toggle-tpl-sub px-2.5 py-1 rounded-lg text-xs font-bold border transition-all ${isChecked ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'}" data-subtype="${st}">
+            <i class="fa-solid ${isChecked ? 'fa-check' : 'fa-plus'} text-[10px] mr-1"></i>${st}
+          </button>
+        `;
+      }).join('');
+
+      subContainer.querySelectorAll(".btn-toggle-tpl-sub").forEach(b => {
+        b.addEventListener("click", () => {
+          const st = b.getAttribute("data-subtype");
+          if (currentTplAppliedSubTypes.includes(st)) {
+            currentTplAppliedSubTypes = currentTplAppliedSubTypes.filter(x => x !== st);
+          } else {
+            currentTplAppliedSubTypes.push(st);
+          }
+          openTemplateEditModal(document.getElementById("editTplId").value || null);
+        });
+      });
+
+      renderTplItemRows();
+      renderTplQuickNoteChips();
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeTemplateEditModal() {
+      const modal = document.getElementById("templateEditModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    function renderTplItemRows() {
+      const container = document.getElementById("editTplItemsContainer");
+      container.innerHTML = currentTplItems.map((it, idx) => `
+        <div class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-xl">
+          <span class="font-mono text-slate-400 font-bold text-xs w-5 text-center">${idx + 1}.</span>
+          <input type="text" class="input-tpl-item-title flex-1 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500" data-idx="${idx}" value="${it.title.replace(/"/g, '&quot;')}">
+          <button type="button" class="btn-del-tpl-item text-slate-400 hover:text-rose-600 p-1.5" data-idx="${idx}" title="삭제">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
         </div>
       `).join('');
+
+      container.querySelectorAll(".input-tpl-item-title").forEach(inp => {
+        inp.addEventListener("input", () => {
+          const idx = parseInt(inp.getAttribute("data-idx"), 10);
+          currentTplItems[idx].title = inp.value;
+        });
+      });
+
+      container.querySelectorAll(".btn-del-tpl-item").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const idx = parseInt(btn.getAttribute("data-idx"), 10);
+          currentTplItems.splice(idx, 1);
+          renderTplItemRows();
+        });
+      });
+    }
+
+    function renderTplQuickNoteChips() {
+      const container = document.getElementById("editTplQuickNotesChips");
+      if (currentTplQuickNotes.length === 0) {
+        container.innerHTML = `<span class="text-slate-400 text-[11px] self-center">빠른 메모 태그가 없습니다.</span>`;
+        return;
+      }
+      container.innerHTML = currentTplQuickNotes.map((qn, i) => `
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-200/80 text-slate-800 font-bold text-xs">
+          <span>${qn}</span>
+          <button type="button" class="btn-del-qn text-slate-400 hover:text-rose-600 font-bold" data-idx="${i}">&times;</button>
+        </span>
+      `).join('');
+
+      container.querySelectorAll(".btn-del-qn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const idx = parseInt(btn.getAttribute("data-idx"), 10);
+          currentTplQuickNotes.splice(idx, 1);
+          renderTplQuickNoteChips();
+        });
+      });
     }
 
     function switchMasterSubTab(tabName) {
@@ -1832,6 +2276,7 @@
             room: item.room || "",
             equipCode: item.equipCode || "",
             no: item.no || "",
+            majorCategory: item.majorCategory || "소화설비",
             name: item.name || "소화기",
             detailLoc: item.detailLoc || "",
             agent: item.agent || "",
@@ -2245,6 +2690,12 @@
       const room = prompt("설치위치(룸명)를 입력하세요:", "[B0101] 지하 크린룸") || "[B0101] 지하 크린룸";
       const area = prompt("My Area 코드를 입력하세요 (A00~A06, RA00):", "A00") || "A00";
 
+      // 템플릿 매핑 자동 결정
+      let tplId = "TPL_FIRE_EXT";
+      const matchedTpl = templateMasterList.find(t => (t.appliedSubTypes || []).includes(name.trim()));
+      if (matchedTpl) tplId = matchedTpl.id;
+      else if (name.includes("소화전")) tplId = "TPL_HYDRANT";
+
       equipMasterList.unshift({
         code: code.trim(),
         facility: "[WH01] 진위사업장",
@@ -2261,7 +2712,7 @@
         area: area.trim(),
         mgmtNo: mgmtNo.trim(),
         dept: "환경안전팀",
-        templateId: name.includes("소화전") ? "TPL_HYDRANT" : "TPL_FIRE_EXT"
+        templateId: tplId
       });
 
       saveEquipMaster();
@@ -2270,6 +2721,154 @@
       renderMasterViews();
       renderEquipCards();
       showToast(`${code} 설비가 신규 등록되었습니다.`);
+    });
+
+    // 분류 그룹 편집 모달 이벤트 핸들러
+    document.getElementById("btnAddNewCategoryGroup")?.addEventListener("click", () => openCategoryEditModal(null));
+    document.getElementById("btnCloseCategoryEditModal")?.addEventListener("click", closeCategoryEditModal);
+    document.getElementById("btnCancelCategoryEditModal")?.addEventListener("click", closeCategoryEditModal);
+
+    document.querySelectorAll(".btn-quick-major").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.getElementById("editCategoryMajor").value = btn.getAttribute("data-major");
+      });
+    });
+
+    document.getElementById("btnAddSubTypeToEditModal")?.addEventListener("click", () => {
+      const inp = document.getElementById("newSubTypeInput");
+      const val = inp.value.trim();
+      if (val && !currentCategoryModalSubs.includes(val)) {
+        currentCategoryModalSubs.push(val);
+        inp.value = "";
+        renderCategoryModalSubChips();
+      }
+    });
+
+    document.getElementById("btnSaveCategoryEditModal")?.addEventListener("click", () => {
+      const catId = document.getElementById("editCategoryId").value;
+      const major = document.getElementById("editCategoryMajor").value.trim() || "소화설비";
+      const name = document.getElementById("editCategoryName").value.trim() || "기타설비류";
+      const defaultTpl = document.getElementById("editCategoryTpl").value;
+
+      if (catId) {
+        const cat = categoryHierarchyList.find(c => c.id === catId);
+        if (cat) {
+          cat.major = major;
+          cat.name = name;
+          cat.defaultTpl = defaultTpl;
+          cat.subTypes = [...currentCategoryModalSubs];
+        }
+      } else {
+        const newCat = {
+          id: "CAT_" + Date.now(),
+          major: major,
+          name: name,
+          defaultTpl: defaultTpl,
+          subTypes: [...currentCategoryModalSubs]
+        };
+        categoryHierarchyList.push(newCat);
+      }
+
+      saveCategoryMaster();
+      closeCategoryEditModal();
+      populateEquipDropdownFilters();
+      renderMasterViews();
+      renderEquipCards();
+      showToast(`'${name}' 분류 그룹이 저장되었습니다.`);
+    });
+
+    document.getElementById("btnDeleteCategoryGroupInModal")?.addEventListener("click", () => {
+      const catId = document.getElementById("editCategoryId").value;
+      if (catId && confirm("이 분류 그룹을 삭제하시겠습니까?")) {
+        categoryHierarchyList = categoryHierarchyList.filter(c => c.id !== catId);
+        saveCategoryMaster();
+        closeCategoryEditModal();
+        populateEquipDropdownFilters();
+        renderMasterViews();
+        showToast("분류 그룹이 삭제되었습니다.");
+      }
+    });
+
+    // 점검표 템플릿 모달 이벤트 핸들러
+    document.getElementById("btnCreateNewTemplate")?.addEventListener("click", () => openTemplateEditModal(null));
+    document.getElementById("btnCloseTemplateEditModal")?.addEventListener("click", closeTemplateEditModal);
+    document.getElementById("btnCancelTemplateEditModal")?.addEventListener("click", closeTemplateEditModal);
+
+    document.getElementById("btnAddTplItemRow")?.addEventListener("click", () => {
+      currentTplItems.push({
+        id: "ITEM_" + Date.now(),
+        title: "신규 점검 기준 문구를 입력하세요"
+      });
+      renderTplItemRows();
+    });
+
+    document.getElementById("btnAddQuickNoteToTpl")?.addEventListener("click", () => {
+      const inp = document.getElementById("newQuickNoteInput");
+      const val = inp.value.trim();
+      if (val && !currentTplQuickNotes.includes(val)) {
+        currentTplQuickNotes.push(val);
+        inp.value = "";
+        renderTplQuickNoteChips();
+      }
+    });
+
+    document.getElementById("btnSaveTemplateEditModal")?.addEventListener("click", () => {
+      const tplId = document.getElementById("editTplId").value;
+      const name = document.getElementById("editTplName").value.trim() || "새 점검표";
+      const category = document.getElementById("editTplCategory").value.trim() || "기타";
+      const applyExisting = document.getElementById("chkApplyTplToExistingEquips").checked;
+
+      let savedId = tplId;
+      if (tplId) {
+        const tpl = templateMasterList.find(t => t.id === tplId);
+        if (tpl) {
+          tpl.name = name;
+          tpl.category = category;
+          tpl.items = [...currentTplItems];
+          tpl.quickNotes = [...currentTplQuickNotes];
+          tpl.appliedSubTypes = [...currentTplAppliedSubTypes];
+        }
+      } else {
+        savedId = "TPL_" + Date.now();
+        templateMasterList.push({
+          id: savedId,
+          name: name,
+          category: category,
+          items: [...currentTplItems],
+          quickNotes: [...currentTplQuickNotes],
+          appliedSubTypes: [...currentTplAppliedSubTypes]
+        });
+      }
+
+      // 대응 설비 원장에 즉시 일괄 반영
+      if (applyExisting && currentTplAppliedSubTypes.length > 0) {
+        let count = 0;
+        equipMasterList.forEach(e => {
+          if (currentTplAppliedSubTypes.includes(e.name)) {
+            e.templateId = savedId;
+            count++;
+          }
+        });
+        saveEquipMaster();
+        showToast(`${count}대 설비에 '${name}' 점검표가 일괄 적용되었습니다.`);
+      }
+
+      saveTemplateMaster();
+      closeTemplateEditModal();
+      renderMasterViews();
+      renderEquipCards();
+      showToast(`'${name}' 점검표가 안전하게 저장되었습니다.`);
+    });
+
+    document.getElementById("btnDeleteTplInModal")?.addEventListener("click", () => {
+      const tplId = document.getElementById("editTplId").value;
+      if (tplId && confirm("이 점검표 템플릿을 삭제하시겠습니까?")) {
+        templateMasterList = templateMasterList.filter(t => t.id !== tplId);
+        saveTemplateMaster();
+        closeTemplateEditModal();
+        renderMasterViews();
+        showToast("점검표 템플릿이 삭제되었습니다.");
+      }
     });
 
     // 필터 리셋 버튼
