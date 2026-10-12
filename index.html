@@ -46,13 +46,6 @@
     .safe-bottom {
       padding-bottom: env(safe-area-inset-bottom, 1rem);
     }
-    .fade-in {
-      animation: fadeIn 0.2s ease-in-out forwards;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-rose-500 selection:text-white">
@@ -103,7 +96,7 @@
         <button id="btnExportData" title="전체 점검결과 CSV 다운로드" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors">
           <i class="fa-solid fa-file-excel text-sm sm:text-base text-emerald-600"></i>
         </button>
-        <button id="btnOpenSettings" title="시스템 및 구글 시트 연동 설정" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors">
+        <button id="btnOpenSettings" title="시스템 및 환경설정 관리" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors">
           <i class="fa-solid fa-gear text-sm sm:text-base"></i>
         </button>
       </div>
@@ -141,16 +134,16 @@
         <div>
           <h2 class="text-xs sm:text-sm font-extrabold tracking-tight flex items-center gap-1.5">
             <span>점검자 기본 정보</span>
-            <span class="text-[10px] font-semibold text-emerald-400 bg-emerald-500/20 px-1.5 py-0.2 rounded border border-emerald-500/30">자동 적용</span>
+            <span class="text-[10px] font-semibold text-emerald-400 bg-emerald-500/20 px-1.5 py-0.2 rounded border border-emerald-500/30">자동 반영</span>
           </h2>
-          <p class="text-[10px] sm:text-[11px] text-slate-300">원터치 체크 및 일괄 점검 시 아래 입력한 성명과 일자로 기록됩니다.</p>
+          <p class="text-[10px] sm:text-[11px] text-slate-300">점검표 작성 및 저장 시 아래 입력한 성명과 일자로 기록됩니다.</p>
         </div>
       </div>
 
       <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 pt-1 md:pt-0">
         <div class="flex-1 sm:flex-none flex items-center bg-slate-800/90 border border-slate-600 rounded-xl px-2.5 py-1.5 focus-within:ring-2 focus-within:ring-rose-500">
           <i class="fa-solid fa-id-badge text-slate-400 text-xs mr-2"></i>
-          <input type="text" id="mainInspectorName" placeholder="점검자 성명 (예: 홍길동)" value="홍길동"
+          <input type="text" id="mainInspectorName" placeholder="점검자 성명" value="홍길동"
             class="bg-transparent text-xs font-bold text-white placeholder-slate-400 focus:outline-none w-28 sm:w-32">
         </div>
 
@@ -222,17 +215,23 @@
               <i class="fa-solid fa-location-dot text-rose-500"></i>
               <span>MY AREA 빠른 선택</span>
             </label>
-            <span class="text-[10px] sm:text-[11px] text-slate-400 font-medium">터치 시 해당 구역 설비 자동 필터링</span>
+            <span class="text-[10px] sm:text-[11px] text-slate-400 font-medium">터치 시 해당 구역 설비 필터링</span>
           </div>
           <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar touch-pan-x" id="equipAreaChipsContainer"></div>
         </div>
 
-        <!-- 계층형 필터 드롭다운 -->
-        <div class="grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-2.5 pt-1">
+        <!-- 계층형 필터 드롭다운 (대분류 ➔ 세부종류 종속 연동) -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5 pt-1">
           <div>
-            <label class="block text-[10px] sm:text-[11px] font-bold text-slate-500 mb-0.5">설비 종류</label>
+            <label class="block text-[10px] sm:text-[11px] font-bold text-slate-500 mb-0.5">상위 카테고리 (대분류)</label>
+            <select id="equipFilterMajorCat" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-rose-500 focus:outline-none">
+              <option value="">전체 대분류</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] sm:text-[11px] font-bold text-slate-500 mb-0.5">설비 세부 종류</label>
             <select id="equipFilterCategory" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-rose-500 focus:outline-none">
-              <option value="">전체 종류</option>
+              <option value="">전체 세부종류</option>
             </select>
           </div>
           <div>
@@ -253,8 +252,8 @@
               <option value="">전체 룸/구역</option>
             </select>
           </div>
-          <div class="col-span-2 lg:col-span-1">
-            <label class="block text-[10px] sm:text-[11px] font-bold text-slate-500 mb-0.5">빠른 검색 (QR/관리번호/위치)</label>
+          <div class="col-span-2 sm:col-span-1 lg:col-span-1">
+            <label class="block text-[10px] sm:text-[11px] font-bold text-slate-500 mb-0.5">빠른 검색 (QR/번호/위치)</label>
             <div class="relative">
               <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
               <input type="text" id="equipFilterSearch" placeholder="코드/번호/명칭..." 
@@ -269,12 +268,8 @@
             <span id="equipFilteredCount" class="px-2.5 py-0.5 bg-rose-50 text-rose-700 rounded-md font-bold font-mono">0개소</span>
           </div>
           <div class="flex items-center gap-2">
-            <button id="btnEquipResetFilter" class="flex-1 sm:flex-none px-3 py-2 text-xs text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl font-semibold transition-colors text-center border border-slate-200 sm:border-transparent">
+            <button id="btnEquipResetFilter" class="px-3 py-2 text-xs text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl font-semibold transition-colors text-center border border-slate-200 sm:border-transparent">
               <i class="fa-solid fa-arrow-rotate-left mr-1"></i> 필터 리셋
-            </button>
-            <button id="btnEquipBatchPass" class="flex-2 sm:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-200 transition-all flex items-center justify-center gap-1.5 min-h-[38px]">
-              <i class="fa-solid fa-check-double"></i>
-              <span>전체 [O 양호] 처리</span>
             </button>
           </div>
         </div>
@@ -293,12 +288,8 @@
               <i class="fa-solid fa-map-location-dot text-indigo-600"></i>
               <span>MY AREA 순찰 점검 (구역별 특화 점검표)</span>
             </h2>
-            <p class="text-xs text-slate-500">구역 환경 특성에 최적화된 방화 순찰 항목을 일괄 점검합니다.</p>
+            <p class="text-xs text-slate-500">구역 카드를 터치하여 해당 구역 전용 방화 순찰 점검표를 확인 후 제출합니다.</p>
           </div>
-          <button id="btnAreaBatchPass" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-200 transition-all flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-check-double"></i>
-            <span>전체 구역 [O 양호] 완료</span>
-          </button>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="areaCardsContainer"></div>
@@ -314,12 +305,8 @@
               <i class="fa-solid fa-building-user text-amber-500"></i>
               <span>MY ZONE 부서 점검 (세부 룸 단위 위임)</span>
             </h2>
-            <p class="text-xs text-slate-500">각 부서가 관할하는 룸(Zone)의 일상 화재예방 점검을 자율 수행합니다.</p>
+            <p class="text-xs text-slate-500">룸 카드를 터치하여 부서 일상 화재예방 점검표를 확인 후 작성·저장합니다.</p>
           </div>
-          <button id="btnZoneBatchPass" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-200 transition-all flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-check-double"></i>
-            <span>조회 룸 [O 양호] 완료</span>
-          </button>
         </div>
 
         <!-- 부서 선택 칩 -->
@@ -406,41 +393,44 @@
       </section>
     </div>
 
-  <!-- ==================== 기준정보 마스터 관리 뷰 ==================== -->
-  <div id="viewMasterSection" class="hidden space-y-3.5 sm:space-y-4 flex flex-col flex-1">
-    <section class="bg-white rounded-2xl p-3.5 sm:p-4 shadow-xs border border-slate-200/90 space-y-3">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-100 pb-2.5">
-        <div>
-          <h2 class="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-1.5">
-            <i class="fa-solid fa-sliders text-rose-600"></i>
-            <span>기준정보 및 템플릿 마스터 관리 (관리자 모드)</span>
-          </h2>
-          <p class="text-xs text-slate-500">설비 등록, Zone 부서 위임 매핑, 점검표 템플릿 항목을 직접 편집합니다.</p>
+    <!-- ==================== 기준정보 마스터 관리 뷰 ==================== -->
+    <div id="viewMasterSection" class="hidden space-y-3.5 sm:space-y-4 flex flex-col flex-1">
+      <section class="bg-white rounded-2xl p-3.5 sm:p-4 shadow-xs border border-slate-200/90 space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-100 pb-2.5">
+          <div>
+            <h2 class="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-1.5">
+              <i class="fa-solid fa-sliders text-rose-600"></i>
+              <span>기준정보 및 템플릿 마스터 관리 (관리자 모드)</span>
+            </h2>
+            <p class="text-xs text-slate-500">설비 등록, Zone 부서 위임 매핑, 점검표 템플릿 항목을 직접 편집합니다.</p>
+          </div>
+          <button id="btnLockMaster" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 self-start sm:self-auto">
+            <i class="fa-solid fa-arrow-left mr-1"></i> 점검 화면으로 나가기
+          </button>
         </div>
-        <button id="btnLockMaster" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 self-start sm:self-auto">
-          <i class="fa-solid fa-arrow-left mr-1"></i> 점검 화면으로 나가기
-        </button>
-      </div>
 
-      <!-- 기준정보 서브 탭 -->
-      <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-full sm:w-auto overflow-x-auto no-scrollbar">
-        <button id="btnSubTabEquipMaster" class="flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all bg-white text-slate-900 shadow-xs border border-slate-200 shrink-0">
-          설비/장비 마스터
-        </button>
-        <button id="btnSubTabZoneMaster" class="flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-lg transition-all shrink-0">
-          Zone / 부서 매핑
-        </button>
-        <button id="btnSubTabTplMaster" class="flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-lg transition-all shrink-0">
-          점검표 템플릿
-        </button>
-        <button id="btnSubTabGoogleSync" class="flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-semibold text-emerald-700 hover:text-emerald-900 bg-emerald-50/70 hover:bg-emerald-100/70 rounded-lg transition-all shrink-0 flex items-center gap-1.5">
-          <i class="fa-solid fa-sliders text-emerald-600"></i>
-          <span>환경설정 / 구글연동</span>
-        </button>
-      </div>
+        <!-- 기준정보 서브 탭 -->
+        <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-full sm:w-auto overflow-x-auto no-scrollbar">
+          <button id="btnSubTabEquipMaster" class="flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all bg-white text-slate-900 shadow-xs border border-slate-200 shrink-0">
+            설비/장비 마스터
+          </button>
+          <button id="btnSubTabCategoryMaster" class="flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-lg transition-all shrink-0">
+            설비 분류 체계 (대/소분류)
+          </button>
+          <button id="btnSubTabZoneMaster" class="flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-lg transition-all shrink-0">
+            Zone / 부서 매핑
+          </button>
+          <button id="btnSubTabTplMaster" class="flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-lg transition-all shrink-0">
+            점검표 템플릿
+          </button>
+          <button id="btnSubTabGoogleSync" class="flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-semibold text-emerald-700 hover:text-emerald-900 bg-emerald-50/70 hover:bg-emerald-100/70 rounded-lg transition-all shrink-0 flex items-center gap-1.5">
+            <i class="fa-solid fa-sliders text-emerald-600"></i>
+            <span>환경설정 / 구글연동</span>
+          </button>
+        </div>
 
-      <!-- 5-1. 설비 마스터 그리드 -->
-      <div id="subViewEquipMaster" class="space-y-3">
+        <!-- 5-1. 설비 마스터 그리드 -->
+        <div id="subViewEquipMaster" class="space-y-3">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <input type="text" id="masterEquipSearchInput" placeholder="설비코드/관리번호/위치 검색..." class="w-full sm:w-64 p-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-semibold focus:outline-none">
             <button id="btnOpenNewEquipModal" class="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-md shadow-rose-200 flex items-center gap-1">
@@ -454,6 +444,7 @@
                 <tr>
                   <th class="p-2.5">QR코드</th>
                   <th class="p-2.5">관리번호</th>
+                  <th class="p-2.5">대분류</th>
                   <th class="p-2.5">명칭 / 종류</th>
                   <th class="p-2.5">위치 정보</th>
                   <th class="p-2.5">약제/용량</th>
@@ -467,7 +458,35 @@
           </div>
         </div>
 
-        <!-- 5-2. Zone / 부서 매핑 뷰 -->
+        <!-- 5-2. 설비 분류 체계 (대/소분류) 마스터 뷰 -->
+        <div id="subViewCategoryMaster" class="hidden space-y-3">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <div>
+              <p class="text-xs text-slate-500 font-semibold">설비 대분류(소화/경보/피난구조 등)와 세부 설비 종류 체계를 관리합니다.</p>
+            </div>
+            <button id="btnAddNewCategoryGroup" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-200 flex items-center gap-1">
+              <i class="fa-solid fa-plus"></i>
+              <span>신규 분류 그룹 등록</span>
+            </button>
+          </div>
+          <div class="overflow-x-auto border border-slate-200 rounded-xl custom-scrollbar max-h-[500px]">
+            <table class="w-full text-left text-xs divide-y divide-slate-200">
+              <thead class="bg-slate-50 font-bold text-slate-600 sticky top-0 z-10">
+                <tr>
+                  <th class="p-2.5">대분류 (Major)</th>
+                  <th class="p-2.5">분류 그룹명</th>
+                  <th class="p-2.5">포함된 세부 종류 (Sub Types)</th>
+                  <th class="p-2.5">기본 점검표</th>
+                  <th class="p-2.5">등록 설비수</th>
+                  <th class="p-2.5 text-center">관리</th>
+                </tr>
+              </thead>
+              <tbody id="masterCategoryTableBody" class="divide-y divide-slate-100 font-medium"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 5-3. Zone / 부서 매핑 뷰 -->
         <div id="subViewZoneMaster" class="hidden space-y-3">
           <p class="text-xs text-slate-500 font-semibold">각 세부 룸(Zone)별로 점검 책임을 맡길 담당 부서를 지정합니다.</p>
           <div class="overflow-x-auto border border-slate-200 rounded-xl custom-scrollbar max-h-[500px]">
@@ -487,96 +506,96 @@
         </div>
 
         <!-- 5-3. 점검표 템플릿 관리 뷰 -->
-      <div id="subViewTplMaster" class="hidden space-y-3">
-        <p class="text-xs text-slate-500 font-semibold">시스템에 등록된 점검표 템플릿 항목들을 열람 및 관리합니다.</p>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="masterTplContainer"></div>
-      </div>
-
-      <!-- 5-4. 구글 시트 연동 관리 뷰 -->
-      <div id="subViewGoogleSync" class="hidden space-y-3.5">
-        <div class="p-3.5 bg-emerald-50/60 rounded-xl border border-emerald-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div>
-            <h3 class="text-xs sm:text-sm font-extrabold text-emerald-900 flex items-center gap-1.5">
-              <i class="fa-brands fa-google text-emerald-600"></i>
-              <span>구글 스프레드시트 양방향 데이터 연동 및 환경설정</span>
-            </h3>
-            <p class="text-[11px] text-emerald-700 mt-0.5">구글 시트의 설비 기준정보를 가져오거나 현재 웹앱 데이터를 구글 시트에 즉시 반영합니다.</p>
-          </div>
-          <div class="flex items-center gap-1.5 shrink-0">
-            <span id="googleSyncBadge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-700">대기 중</span>
-            <span class="text-[10px] text-slate-400 font-mono" id="lastGoogleSyncTime">동기화 이력 없음</span>
-          </div>
+        <div id="subViewTplMaster" class="hidden space-y-3">
+          <p class="text-xs text-slate-500 font-semibold">시스템에 등록된 점검표 템플릿 항목들을 열람 및 관리합니다.</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="masterTplContainer"></div>
         </div>
 
-        <div class="space-y-2">
-          <label class="block text-xs font-bold text-slate-700">구글 Apps Script Web App URL</label>
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-            <input type="text" id="googleScriptUrlInput" placeholder="https://script.google.com/macros/s/.../exec"
-              class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        <!-- 5-4. 구글 시트 연동 관리 뷰 -->
+        <div id="subViewGoogleSync" class="hidden space-y-3.5">
+          <div class="p-3.5 bg-emerald-50/60 rounded-xl border border-emerald-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div>
+              <h3 class="text-xs sm:text-sm font-extrabold text-emerald-900 flex items-center gap-1.5">
+                <i class="fa-brands fa-google text-emerald-600"></i>
+                <span>구글 스프레드시트 양방향 데이터 연동 및 환경설정</span>
+              </h3>
+              <p class="text-[11px] text-emerald-700 mt-0.5">구글 시트의 설비 기준정보를 가져오거나 현재 웹앱 데이터를 구글 시트에 즉시 반영합니다.</p>
+            </div>
             <div class="flex items-center gap-1.5 shrink-0">
-              <button id="btnSaveGoogleUrl" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-colors">
-                <i class="fa-solid fa-floppy-disk mr-1"></i> URL 저장
-              </button>
-              <button id="btnResetDefaultGoogleUrl" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-colors" title="기본 등록된 구글 URL로 복원">
-                기본 URL 복원
-              </button>
+              <span id="googleSyncBadge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-700">대기 중</span>
+              <span class="text-[10px] text-slate-400 font-mono" id="lastGoogleSyncTime">동기화 이력 없음</span>
             </div>
           </div>
-          <p class="text-[10px] text-slate-400">※ 새 배포 후 발급된 최신 Web App URL을 입력하고 저장을 누르면 즉시 브라우저에 반영됩니다.</p>
-        </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-          <button id="btnFetchFromGoogle" class="p-3 bg-white hover:bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98]">
-            <i class="fa-solid fa-cloud-arrow-down text-emerald-600 text-sm"></i>
-            <span>구글시트에서 기준정보 가져오기 (Pull)</span>
-          </button>
-          <button id="btnPushToGoogle" class="p-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md shadow-emerald-200 transition-all active:scale-[0.98]">
-            <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
-            <span>웹앱 기준정보를 구글시트로 업로드 (Push)</span>
-          </button>
-        </div>
-
-        <!-- 점검기록 양방향 동기화 섹션 추가 -->
-        <div class="p-3.5 bg-indigo-50/70 rounded-xl border border-indigo-200/80 space-y-2 mt-3">
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-            <div>
-              <h4 class="text-xs sm:text-sm font-extrabold text-indigo-950 flex items-center gap-1.5">
-                <i class="fa-solid fa-clipboard-check text-indigo-600"></i>
-                <span>점검 기록 구글시트 양방향 동기화 (PC 엑셀 일괄입력 연동)</span>
-              </h4>
-              <p class="text-[11px] text-indigo-700 mt-0.5">
-                현장 모바일 점검기록을 구글시트로 백업하거나, PC에서 구글시트에 일괄 작성한 점검결과를 웹앱으로 불러와 점검완료 처리합니다.
-              </p>
+          <div class="space-y-2">
+            <label class="block text-xs font-bold text-slate-700">구글 Apps Script Web App URL</label>
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <input type="text" id="googleScriptUrlInput" placeholder="https://script.google.com/macros/s/.../exec"
+                class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <div class="flex items-center gap-1.5 shrink-0">
+                <button id="btnSaveGoogleUrl" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-colors">
+                  <i class="fa-solid fa-floppy-disk mr-1"></i> URL 저장
+                </button>
+                <button id="btnResetDefaultGoogleUrl" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-colors" title="기본 등록된 구글 URL로 복원">
+                  기본 URL 복원
+                </button>
+              </div>
             </div>
+            <p class="text-[10px] text-slate-400">※ 새 배포 후 발급된 최신 Web App URL을 입력하고 저장을 누르면 즉시 브라우저에 반영됩니다.</p>
           </div>
+
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-            <button id="btnFetchRecordsFromGoogle" class="p-2.5 bg-white hover:bg-indigo-50 border border-indigo-300 text-indigo-800 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98]">
-              <i class="fa-solid fa-cloud-arrow-down text-indigo-600 text-sm"></i>
-              <span>구글시트 점검기록 ➔ 웹앱으로 가져오기 (완료 반영)</span>
+            <button id="btnFetchFromGoogle" class="p-3 bg-white hover:bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98]">
+              <i class="fa-solid fa-cloud-arrow-down text-emerald-600 text-sm"></i>
+              <span>구글시트에서 기준정보 가져오기 (Pull)</span>
             </button>
-            <button id="btnPushRecordsToGoogle" class="p-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md shadow-indigo-200 transition-all active:scale-[0.98]">
+            <button id="btnPushToGoogle" class="p-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md shadow-emerald-200 transition-all active:scale-[0.98]">
               <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
-              <span>웹앱 점검기록 ➔ 구글시트로 업로드</span>
+              <span>웹앱 기준정보를 구글시트로 업로드 (Push)</span>
             </button>
           </div>
-        </div>
 
-        <div class="pt-3 border-t border-slate-200">
-          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
-            <div>
-              <h4 class="text-xs font-bold text-slate-800">이번 달 점검 진행 데이터 초기화</h4>
-              <p class="text-[10px] text-slate-500">기준정보는 보존되며, 이번 달 점검 완료 기록만 초기화하여 새로운 월 점검을 시작합니다.</p>
+          <!-- 점검기록 양방향 동기화 섹션 -->
+          <div class="p-3.5 bg-indigo-50/70 rounded-xl border border-indigo-200/80 space-y-2 mt-3">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+              <div>
+                <h4 class="text-xs sm:text-sm font-extrabold text-indigo-950 flex items-center gap-1.5">
+                  <i class="fa-solid fa-clipboard-check text-indigo-600"></i>
+                  <span>점검 기록 구글시트 양방향 동기화 (PC 엑셀 일괄입력 연동)</span>
+                </h4>
+                <p class="text-[11px] text-indigo-700 mt-0.5">
+                  현장 모바일 점검기록을 구글시트로 백업하거나, PC에서 구글시트에 일괄 작성한 점검결과를 웹앱으로 불러와 점검완료 처리합니다.
+                </p>
+              </div>
             </div>
-            <button id="btnClearInspectionRecords" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold rounded-xl transition-colors shrink-0">
-              <i class="fa-solid fa-trash-can mr-1"></i> 점검 기록 초기화
-            </button>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+              <button id="btnFetchRecordsFromGoogle" class="p-2.5 bg-white hover:bg-indigo-50 border border-indigo-300 text-indigo-800 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98]">
+                <i class="fa-solid fa-cloud-arrow-down text-indigo-600 text-sm"></i>
+                <span>구글시트 점검기록 ➔ 웹앱으로 가져오기 (완료 반영)</span>
+              </button>
+              <button id="btnPushRecordsToGoogle" class="p-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md shadow-indigo-200 transition-all active:scale-[0.98]">
+                <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
+                <span>웹앱 점검기록 ➔ 구글시트로 업로드</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-slate-200">
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+              <div>
+                <h4 class="text-xs font-bold text-slate-800">이번 달 점검 진행 데이터 초기화</h4>
+                <p class="text-[10px] text-slate-500">기준정보는 보존되며, 이번 달 점검 완료 기록만 초기화하여 새로운 월 점검을 시작합니다.</p>
+              </div>
+              <button id="btnClearInspectionRecords" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold rounded-xl transition-colors shrink-0">
+                <i class="fa-solid fa-trash-can mr-1"></i> 점검 기록 초기화
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
-  </div>
+      </section>
+    </div>
 
-</main>
+  </main>
 
   <!-- ==================== 상세 점검 체크리스트 모달 (inspectionModal) ==================== -->
   <div id="inspectionModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-end sm:items-center justify-center p-0 sm:p-4">
@@ -600,7 +619,10 @@
       <div class="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs custom-scrollbar">
         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
           <h4 id="modalChecklistTitle" class="font-extrabold text-slate-800 text-xs sm:text-sm">소화기 점검표 (소방청 표준 7항목)</h4>
-          <span class="text-[10px] text-slate-400">각 항목 판정 선택</span>
+          <button type="button" id="btnModalSetAllPass" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 rounded-lg text-[11px] font-bold transition-all shadow-2xs flex items-center gap-1">
+            <i class="fa-solid fa-check-double text-[10px]"></i>
+            <span>전 항목 O 양호</span>
+          </button>
         </div>
 
         <div id="modalChecklistRowsContainer" class="divide-y divide-slate-100 border border-slate-200 rounded-xl bg-slate-50/40"></div>
@@ -648,7 +670,7 @@
       </div>
       <div>
         <h4 class="text-base font-extrabold text-slate-900">관리자 인증</h4>
-        <p class="text-xs text-slate-500 mt-1">기준정보 관리를 위해 비밀번호를 입력하세요.</p>
+        <p class="text-xs text-slate-500 mt-1">기준정보 및 설정을 위해 비밀번호를 입력하세요.</p>
       </div>
       <div>
         <input type="password" id="adminPinInput" maxlength="6" placeholder="비밀번호 (3333)" 
@@ -749,6 +771,45 @@
       }
     ];
 
+    // 설비 분류 체계 (상위 대분류 ➔ 세부 종류) 마스터 정의
+    const DEFAULT_CATEGORY_HIERARCHY = [
+      { 
+        id: "CAT_FIRE_EXT", 
+        major: "소화설비", 
+        name: "소화기류", 
+        subTypes: ["분말 소화기", "청정 소화기", "금속 소화기", "CO2 소화기", "강화액 소화기"], 
+        defaultTpl: "TPL_FIRE_EXT" 
+      },
+      { 
+        id: "CAT_FIRE_HYD", 
+        major: "소화설비", 
+        name: "소화전/호스류", 
+        subTypes: ["옥내소화전", "옥외소화전", "상수도소화전", "방수구"], 
+        defaultTpl: "TPL_HYDRANT" 
+      },
+      { 
+        id: "CAT_ALARM", 
+        major: "경보설비", 
+        name: "감지기/발신기류", 
+        subTypes: ["화재감지기", "가스누설경보기", "시각경보기", "발신기함"], 
+        defaultTpl: "TPL_FIRE_EXT" 
+      },
+      { 
+        id: "CAT_EVAC", 
+        major: "피난구조설비", 
+        name: "유도/조명류", 
+        subTypes: ["유도등", "비상조명등", "완강기", "구조손수건함"], 
+        defaultTpl: "TPL_FIRE_EXT" 
+      },
+      { 
+        id: "CAT_SAFETY", 
+        major: "방호/환경안전", 
+        name: "방호/차단류", 
+        subTypes: ["방화셔터", "방화문", "비상샤워기", "정전기접지기"], 
+        defaultTpl: "TPL_AREA_CLEAN" 
+      }
+    ];
+
     // MY AREA 마스터 정의
     const AREAS_MASTER = [
       { id: "A00", name: "유틸리티 & 옥외", tplId: "TPL_AREA_UTIL", desc: "기계실, 변전실, 발전기실, 옥외 가스/폐기물" },
@@ -761,7 +822,7 @@
       { id: "RA00", name: "진위연구소 전체", tplId: "TPL_AREA_UTIL", desc: "연구실, 유해물질부스, 가스실, 정밀측정실" }
     ];
 
-    // 120여 건 실제 소화기 및 시설장비 데이터셋
+    // 소화기 원장 데이터
     const RAW_EQUIP_DATA = [
       { code: "WH01B0101F5FE101", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0101] 지하 크린룸", equipCode: "F5FE1", no: "01", name: "분말 소화기", detailLoc: "EnC크린룸 앞 복도", agent: "제1인산암모늄", amount: "3.3kg", expire: "2030.01.", area: "A06", mgmtNo: "A06-21" },
       { code: "WH01B0101F5FE102", facility: "[WH01] 진위사업장", floor: "B1F", room: "[B0101] 지하 크린룸", equipCode: "F5FE1", no: "02", name: "분말 소화기", detailLoc: "지하 ENC크린룸 내 자동셔터 측", agent: "제1인산암모늄", amount: "3.3kg", expire: "2031.11.", area: "A06", mgmtNo: "A06-09" },
@@ -808,7 +869,7 @@
       { code: "WH02F0201F5FE201", facility: "[WH02] 진위연구소", floor: "2F", room: "[F0201] 연구소 2층", equipCode: "F5FE2", no: "01", name: "청정 소화기", detailLoc: "사무실 창가", agent: "HCFC-123", amount: "3kg", expire: "2028.11.", area: "RA00", mgmtNo: "RA00-34" }
     ];
 
-    // MY ZONE 부서 매핑 마스터
+    // MY ZONE 기본 부서 매핑
     const DEFAULT_ZONES = [
       { id: "ZONE_B0101", name: "지하 크린룸", facility: "[WH01] 진위사업장", floor: "B1F", dept: "제조기술1팀" },
       { id: "ZONE_B0109", name: "지하 기계/변전실", facility: "[WH01] 진위사업장", floor: "B1F", dept: "시설환경팀" },
@@ -822,17 +883,17 @@
       { id: "ZONE_R0101", name: "진위연구소 실험동", facility: "[WH02] 진위연구소", floor: "1F", dept: "선행연구팀" }
     ];
 
-    // 기본 Google Apps Script 웹 앱 URL 사전 등록
+    // 기본 Google Apps Script 웹 앱 URL
     const DEFAULT_GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzbTcTZ0BU-Y6jAb0MWjelgEWiZErWK80jUbCg58csi4Qq-28V_zmPmqmP8LTLr_kTV/exec";
 
-    let currentMode = "equip"; // equip, area, zone, history, master
+    let currentMode = "equip";
     let isMasterUnlocked = false;
     let selectedArea = "";
     let selectedDept = "";
     
-    // 점검자 기본 프로필 (메인 페이지에서 관리)
+    // 점검자 기본 프로필
     let currentInspectorProfile = {
-      name: "담당자",
+      name: "홍길동",
       date: new Date().toISOString().split("T")[0]
     };
     try {
@@ -840,11 +901,9 @@
       if (savedProfile) {
         currentInspectorProfile = { ...currentInspectorProfile, ...JSON.parse(savedProfile) };
       }
-    } catch(e) {
-      console.warn("Inspector profile load failed", e);
-    }
+    } catch(e) {}
 
-    // 점검 레코드 스토리지 로드
+    // 점검 레코드 로드
     let inspectionRecords = {};
     try {
       const saved = localStorage.getItem("SAFETYCHECK_RECORDS_V3");
@@ -858,9 +917,33 @@
     try {
       const savedEquips = localStorage.getItem("SAFETYCHECK_EQUIPS_V3");
       if (savedEquips) equipMasterList = JSON.parse(savedEquips);
-      else equipMasterList = RAW_EQUIP_DATA.map(item => ({ ...item, templateId: "TPL_FIRE_EXT" }));
+      else equipMasterList = RAW_EQUIP_DATA.map(item => ({ 
+        ...item, 
+        majorCategory: item.majorCategory || (item.name.includes("소화기") || item.name.includes("소화전") ? "소화설비" : "소화설비"),
+        templateId: "TPL_FIRE_EXT" 
+      }));
     } catch(e) {
-      equipMasterList = RAW_EQUIP_DATA.map(item => ({ ...item, templateId: "TPL_FIRE_EXT" }));
+      equipMasterList = RAW_EQUIP_DATA.map(item => ({ 
+        ...item, 
+        majorCategory: item.majorCategory || "소화설비",
+        templateId: "TPL_FIRE_EXT" 
+      }));
+    }
+
+    // 설비 분류 체계 마스터 로드
+    let categoryHierarchyList = [];
+    try {
+      const savedCats = localStorage.getItem("SAFETYCHECK_CATEGORIES_V3");
+      if (savedCats) categoryHierarchyList = JSON.parse(savedCats);
+      else categoryHierarchyList = DEFAULT_CATEGORY_HIERARCHY;
+    } catch(e) {
+      categoryHierarchyList = DEFAULT_CATEGORY_HIERARCHY;
+    }
+
+    function saveCategoryMaster() {
+      try {
+        localStorage.setItem("SAFETYCHECK_CATEGORIES_V3", JSON.stringify(categoryHierarchyList));
+      } catch(e) {}
     }
 
     // Zone 부서 매핑 로드
@@ -873,7 +956,6 @@
       zoneMasterList = DEFAULT_ZONES;
     }
 
-    // 설비 기준정보(equipMasterList)로부터 MY ZONE(세부 룸 단위 및 부서)과 MY AREA를 자동 산입/동기화하는 함수
     function deriveZonesAndAreasFromEquips() {
       if (!Array.isArray(equipMasterList) || equipMasterList.length === 0) return;
 
@@ -882,7 +964,6 @@
         if (!e.room) return;
         const roomKey = e.room.trim();
         if (!roomMap.has(roomKey)) {
-          // 부서 추론 (e.dept 지정값 우선, 부재 시 룸 명칭 키워드 기반 기본 배정)
           let dept = e.dept;
           if (!dept) {
             const rLow = roomKey.toLowerCase();
@@ -906,7 +987,6 @@
         }
       });
 
-      // 기존 수동 편집된 부서 지정 정보가 있으면 보존 병합
       if (Array.isArray(zoneMasterList) && zoneMasterList.length > 0) {
         zoneMasterList.forEach(existingZone => {
           if (roomMap.has(existingZone.name)) {
@@ -920,26 +1000,20 @@
       zoneMasterList = Array.from(roomMap.values());
       try {
         localStorage.setItem("SAFETYCHECK_ZONES_V3", JSON.stringify(zoneMasterList));
-      } catch (err) {
-        console.warn("Zone master storage failed", err);
-      }
+      } catch (err) {}
     }
 
     function saveRecords() {
       try {
         localStorage.setItem("SAFETYCHECK_RECORDS_V3", JSON.stringify(inspectionRecords));
-      } catch(e) {
-        console.error("Storage save failed", e);
-      }
+      } catch(e) {}
       updateStatusMetrics();
     }
 
     function saveEquipMaster() {
       try {
         localStorage.setItem("SAFETYCHECK_EQUIPS_V3", JSON.stringify(equipMasterList));
-      } catch(e) {
-        console.error("Equip master save failed", e);
-      }
+      } catch(e) {}
     }
 
     function showToast(message, isSuccess = true) {
@@ -964,14 +1038,14 @@
 
     // 모달 활성 데이터
     let activeModal = {
-      mode: "", // EQUIP, AREA, ZONE
+      mode: "",
       targetId: "",
       title: "",
       sub: "",
       tpl: null,
       checks: {},
       note: "",
-      inspector: "담당자",
+      inspector: "홍길동",
       date: new Date().toISOString().split("T")[0]
     };
 
@@ -994,7 +1068,7 @@
       });
 
       activeModal.note = existing?.note || "";
-      activeModal.inspector = existing?.inspector || currentInspectorProfile.name || "담당자";
+      activeModal.inspector = existing?.inspector || currentInspectorProfile.name || "홍길동";
       activeModal.date = existing?.date || currentInspectorProfile.date || new Date().toISOString().split("T")[0];
 
       document.getElementById("modalTargetTitle").textContent = title;
@@ -1006,7 +1080,6 @@
       document.getElementById("modalInspectorInput").value = activeModal.inspector;
       document.getElementById("modalDateInput").value = activeModal.date;
 
-      // 빠른 메모 칩
       const notesContainer = document.getElementById("modalQuickNotesContainer");
       notesContainer.innerHTML = (tpl.quickNotes || []).map(text => `
         <button type="button" class="btn-quick-note text-[10px] px-2 py-0.5 rounded-md font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200" data-text="${text}">
@@ -1015,7 +1088,8 @@
       `).join('');
 
       notesContainer.querySelectorAll(".btn-quick-note").forEach(btn => {
-        btn.addEventListener("click", () => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
           const t = btn.getAttribute("data-text");
           const input = document.getElementById("modalNoteInput");
           input.value = input.value ? `${input.value}, ${t}` : t;
@@ -1077,14 +1151,17 @@
     }
 
     function getFilteredEquips() {
-      const category = document.getElementById("equipFilterCategory").value;
-      const facility = document.getElementById("equipFilterFacility").value;
-      const floor = document.getElementById("equipFilterFloor").value;
-      const room = document.getElementById("equipFilterRoom").value;
-      const search = document.getElementById("equipFilterSearch").value.trim().toLowerCase();
+      const majorCat = document.getElementById("equipFilterMajorCat")?.value || "";
+      const category = document.getElementById("equipFilterCategory")?.value || "";
+      const facility = document.getElementById("equipFilterFacility")?.value || "";
+      const floor = document.getElementById("equipFilterFloor")?.value || "";
+      const room = document.getElementById("equipFilterRoom")?.value || "";
+      const search = document.getElementById("equipFilterSearch")?.value.trim().toLowerCase() || "";
 
       return equipMasterList.filter(item => {
+        const itemMajor = item.majorCategory || (item.name.includes("소화") ? "소화설비" : "소화설비");
         if (selectedArea && item.area !== selectedArea) return false;
+        if (majorCat && itemMajor !== majorCat) return false;
         if (category && !item.name.includes(category)) return false;
         if (facility && item.facility !== facility) return false;
         if (floor && item.floor !== floor) return false;
@@ -1094,7 +1171,8 @@
           const matchMgmt = (item.mgmtNo || "").toLowerCase().includes(search);
           const matchLoc = (item.detailLoc || "").toLowerCase().includes(search);
           const matchName = (item.name || "").toLowerCase().includes(search);
-          if (!matchCode && !matchMgmt && !matchLoc && !matchName) return false;
+          const matchMajor = itemMajor.toLowerCase().includes(search);
+          if (!matchCode && !matchMgmt && !matchLoc && !matchName && !matchMajor) return false;
         }
         return true;
       });
@@ -1130,30 +1208,67 @@
     function populateEquipDropdownFilters() {
       const baseList = selectedArea ? equipMasterList.filter(e => e.area === selectedArea) : equipMasterList;
 
+      const majorSelect = document.getElementById("equipFilterMajorCat");
+      const catSelect = document.getElementById("equipFilterCategory");
       const facilitySelect = document.getElementById("equipFilterFacility");
       const floorSelect = document.getElementById("equipFilterFloor");
       const roomSelect = document.getElementById("equipFilterRoom");
-      const catSelect = document.getElementById("equipFilterCategory");
 
-      const currentFacility = facilitySelect.value;
-      const currentFloor = floorSelect.value;
-      const currentRoom = roomSelect.value;
-      const currentCat = catSelect.value;
+      const currentMajor = majorSelect?.value || "";
+      const currentCat = catSelect?.value || "";
+      const currentFacility = facilitySelect?.value || "";
+      const currentFloor = floorSelect?.value || "";
+      const currentRoom = roomSelect?.value || "";
+
+      // 대분류 목록 추출
+      const allMajors = [...new Set([
+        ...categoryHierarchyList.map(c => c.major),
+        ...baseList.map(e => e.majorCategory || "소화설비")
+      ])].filter(Boolean);
+
+      if (majorSelect) {
+        majorSelect.innerHTML = `<option value="">전체 대분류 (${allMajors.length})</option>` + allMajors.map(m => `<option value="${m}">${m}</option>`).join('');
+        if (allMajors.includes(currentMajor)) majorSelect.value = currentMajor;
+      }
+
+      // 선택된 대분류에 따른 소분류/세부종류 목록 종속 추출
+      let availableCats = [];
+      if (majorSelect?.value) {
+        const groups = categoryHierarchyList.filter(c => c.major === majorSelect.value);
+        groups.forEach(g => {
+          if (Array.isArray(g.subTypes)) availableCats.push(...g.subTypes);
+        });
+        const fromEquips = baseList.filter(e => (e.majorCategory || "소화설비") === majorSelect.value).map(e => e.name);
+        availableCats.push(...fromEquips);
+      } else {
+        categoryHierarchyList.forEach(g => {
+          if (Array.isArray(g.subTypes)) availableCats.push(...g.subTypes);
+        });
+        availableCats.push(...baseList.map(e => e.name));
+      }
+      availableCats = [...new Set(availableCats)].filter(Boolean);
+
+      if (catSelect) {
+        catSelect.innerHTML = `<option value="">전체 세부종류 (${availableCats.length})</option>` + availableCats.map(c => `<option value="${c}">${c}</option>`).join('');
+        if (availableCats.includes(currentCat)) catSelect.value = currentCat;
+      }
 
       const facilities = [...new Set(baseList.map(e => e.facility).filter(Boolean))];
       const floors = [...new Set(baseList.map(e => e.floor).filter(Boolean))];
       const rooms = [...new Set(baseList.map(e => e.room).filter(Boolean))];
-      const cats = ["분말 소화기", "청정 소화기", "금속 소화기", "CO2 소화기", "강화액 소화기"];
 
-      facilitySelect.innerHTML = `<option value="">전체 사업장 (${facilities.length})</option>` + facilities.map(f => `<option value="${f}">${f}</option>`).join('');
-      floorSelect.innerHTML = `<option value="">전체 층수 (${floors.length})</option>` + floors.map(fl => `<option value="${fl}">${fl}</option>`).join('');
-      roomSelect.innerHTML = `<option value="">전체 룸/구역 (${rooms.length})</option>` + rooms.map(r => `<option value="${r}">${r}</option>`).join('');
-      catSelect.innerHTML = `<option value="">전체 종류</option>` + cats.map(c => `<option value="${c}">${c}</option>`).join('');
-
-      if (facilities.includes(currentFacility)) facilitySelect.value = currentFacility;
-      if (floors.includes(currentFloor)) floorSelect.value = currentFloor;
-      if (rooms.includes(currentRoom)) roomSelect.value = currentRoom;
-      if (cats.includes(currentCat)) catSelect.value = currentCat;
+      if (facilitySelect) {
+        facilitySelect.innerHTML = `<option value="">전체 사업장 (${facilities.length})</option>` + facilities.map(f => `<option value="${f}">${f}</option>`).join('');
+        if (facilities.includes(currentFacility)) facilitySelect.value = currentFacility;
+      }
+      if (floorSelect) {
+        floorSelect.innerHTML = `<option value="">전체 층수 (${floors.length})</option>` + floors.map(fl => `<option value="${fl}">${fl}</option>`).join('');
+        if (floors.includes(currentFloor)) floorSelect.value = currentFloor;
+      }
+      if (roomSelect) {
+        roomSelect.innerHTML = `<option value="">전체 룸/구역 (${rooms.length})</option>` + rooms.map(r => `<option value="${r}">${r}</option>`).join('');
+        if (rooms.includes(currentRoom)) roomSelect.value = currentRoom;
+      }
     }
 
     function renderEquipCards() {
@@ -1179,103 +1294,82 @@
 
         let statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200">미점검</span>`;
         let borderClass = "border-slate-200/90";
-        let checkBtnClass = "bg-slate-100 text-slate-400 hover:bg-slate-200";
+        let actionBtn = `
+          <button type="button" class="btn-open-equip-detail shrink-0 px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-1 active:scale-95" data-code="${item.code}">
+            <i class="fa-solid fa-clipboard-check text-[11px]"></i>
+            <span>점검표 작성</span>
+          </button>
+        `;
 
         if (isPass) {
           statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">양호 완료</span>`;
           borderClass = "border-emerald-300 bg-emerald-50/20";
-          checkBtnClass = "bg-emerald-500 text-white shadow-sm shadow-emerald-200";
+          actionBtn = `
+            <button type="button" class="btn-open-equip-detail shrink-0 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-1 active:scale-95" data-code="${item.code}">
+              <i class="fa-solid fa-check text-[11px]"></i>
+              <span>점검 완료됨</span>
+            </button>
+          `;
         } else if (isIssue) {
           statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-200">이상 발생</span>`;
           borderClass = "border-rose-300 bg-rose-50/20";
-          checkBtnClass = "bg-rose-500 text-white shadow-sm shadow-rose-200";
+          actionBtn = `
+            <button type="button" class="btn-open-equip-detail shrink-0 px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-1 active:scale-95" data-code="${item.code}">
+              <i class="fa-solid fa-triangle-exclamation text-[11px]"></i>
+              <span>이상 수정</span>
+            </button>
+          `;
         }
 
         const tpl = TEMPLATES_MASTER.find(t => t.id === item.templateId) || TEMPLATES_MASTER[0];
+        const itemMajor = item.majorCategory || (item.name.includes("소화") ? "소화설비" : "소화설비");
 
         return `
-          <div class="bg-white rounded-2xl p-3.5 sm:p-4 border ${borderClass} shadow-xs hover:shadow-sm transition-all">
+          <div class="equip-card-item cursor-pointer bg-white rounded-2xl p-3.5 sm:p-4 border ${borderClass} shadow-xs hover:shadow-md transition-all active:scale-[0.99]" data-code="${item.code}">
             <div class="flex items-start justify-between gap-2.5 sm:gap-3">
-              <div class="flex items-start space-x-2.5 sm:space-x-3 flex-1 min-w-0">
-                <button type="button" title="원터치 [O 양호] 완료" class="btn-equip-quick-pass w-10 h-10 sm:w-11 sm:h-11 rounded-xl ${checkBtnClass} flex items-center justify-center shrink-0 mt-0.5 transition-all active:scale-95" data-code="${item.code}">
-                  <i class="fa-solid ${isDone ? 'fa-check' : 'fa-circle-check'} text-base"></i>
-                </button>
-                <div class="space-y-1 min-w-0 flex-1">
-                  <div class="flex flex-wrap items-center gap-1 sm:gap-2">
-                    <span class="font-mono-code font-bold text-xs sm:text-sm text-slate-900 flex items-center gap-1">
-                      <i class="fa-solid fa-qrcode text-rose-500 text-[11px]"></i>
-                      <span class="break-all">${item.code}</span>
-                    </span>
-                    <span class="px-2 py-0.5 rounded-md font-bold text-[10px] sm:text-xs bg-rose-50 text-rose-700 border border-rose-200">
-                      ${item.mgmtNo}
-                    </span>
-                    <span class="px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-slate-100 text-slate-700">#${item.area}</span>
-                    ${statusBadge}
-                  </div>
-                  <p class="text-xs sm:text-sm text-slate-800 font-bold leading-snug">
-                    ${item.facility} ${item.floor} &rsaquo; ${item.room} <span class="font-normal text-slate-500">(${item.detailLoc})</span>
-                  </p>
-                  <div class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[10px] sm:text-[11px] text-slate-500">
-                    <span class="font-semibold text-slate-800">${item.name}</span>
-                    <span class="truncate">점검표: <b class="text-indigo-600 font-bold">${tpl.name}</b></span>
-                    ${item.agent ? `<span>약제: ${item.agent} (${item.amount})</span>` : ''}
-                    ${item.expire ? `<span>충전기한: <b class="font-mono text-slate-700">${item.expire}</b></span>` : ''}
-                  </div>
-                  ${isDone ? `
-                    <div class="pt-1 flex flex-wrap items-center gap-1.5 text-[10px] sm:text-[11px]">
-                      <span class="text-slate-500"><i class="fa-solid fa-calendar-check text-emerald-500 mr-1"></i>${rec.date} (${rec.inspector})</span>
-                      ${rec.note ? `<span class="text-rose-600 font-semibold bg-rose-50 px-2 py-0.5 rounded border border-rose-100">특이: ${rec.note}</span>` : ''}
-                    </div>
-                  ` : ''}
+              <div class="space-y-1 min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-1 sm:gap-2">
+                  <span class="font-mono-code font-bold text-xs sm:text-sm text-slate-900 flex items-center gap-1">
+                    <i class="fa-solid fa-qrcode text-rose-500 text-[11px]"></i>
+                    <span class="break-all">${item.code}</span>
+                  </span>
+                  <span class="px-2 py-0.5 rounded-md font-bold text-[10px] sm:text-xs bg-rose-50 text-rose-700 border border-rose-200">
+                    ${item.mgmtNo}
+                  </span>
+                  <span class="px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                    ${itemMajor}
+                  </span>
+                  <span class="px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-slate-100 text-slate-700">#${item.area}</span>
+                  ${statusBadge}
                 </div>
+                <p class="text-xs sm:text-sm text-slate-800 font-bold leading-snug">
+                  ${item.facility} ${item.floor} &rsaquo; ${item.room} <span class="font-normal text-slate-500">(${item.detailLoc})</span>
+                </p>
+                <div class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[10px] sm:text-[11px] text-slate-500">
+                  <span class="font-semibold text-slate-800">${item.name}</span>
+                  <span class="truncate">점검표: <b class="text-indigo-600 font-bold">${tpl.name}</b></span>
+                  ${item.agent ? `<span>약제: ${item.agent} (${item.amount})</span>` : ''}
+                  ${item.expire ? `<span>충전기한: <b class="font-mono text-slate-700">${item.expire}</b></span>` : ''}
+                </div>
+                ${isDone ? `
+                  <div class="pt-1 flex flex-wrap items-center gap-1.5 text-[10px] sm:text-[11px]">
+                    <span class="text-slate-500"><i class="fa-solid fa-calendar-check text-emerald-500 mr-1"></i>${rec.date} (${rec.inspector})</span>
+                    ${rec.note ? `<span class="text-rose-600 font-semibold bg-rose-50 px-2 py-0.5 rounded border border-rose-100">특이: ${rec.note}</span>` : ''}
+                  </div>
+                ` : ''}
               </div>
-              <button type="button" class="btn-open-equip-detail shrink-0 px-2.5 sm:px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs transition-colors active:scale-95" data-code="${item.code}">
-                상세
-              </button>
+              <div class="shrink-0 flex items-center">
+                ${actionBtn}
+              </div>
             </div>
           </div>
         `;
       }).join('');
 
-      // 원터치 양호 버튼 이벤트
-      container.querySelectorAll(".btn-equip-quick-pass").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const code = btn.getAttribute("data-code");
-          const equip = equipMasterList.find(e => e.code === code);
-          if (!equip) return;
-
-          const key = `EQUIP_${code}`;
-          if (inspectionRecords[key]) {
-            delete inspectionRecords[key];
-            showToast(`${code} 점검 취소`);
-          } else {
-            const tpl = TEMPLATES_MASTER.find(t => t.id === equip.templateId) || TEMPLATES_MASTER[0];
-            const checks = {};
-            tpl.items.forEach(it => { checks[it.id] = "O"; });
-
-            inspectionRecords[key] = {
-              mode: "EQUIP",
-              targetId: code,
-              title: `${equip.name} (${equip.mgmtNo})`,
-              sub: `${equip.facility} ${equip.floor} ${equip.room}`,
-              status: "PASS",
-              checks: checks,
-              note: "",
-              inspector: currentInspectorProfile.name || "담당자",
-              date: currentInspectorProfile.date || new Date().toISOString().split("T")[0],
-              timestamp: Date.now()
-            };
-            showToast(`${equip.mgmtNo} [O 양호] 점검 완료`);
-          }
-          saveRecords();
-          renderEquipCards();
-        });
-      });
-
-      // 상세 점검 모달 열기
-      container.querySelectorAll(".btn-open-equip-detail").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const code = btn.getAttribute("data-code");
+      // 설비 카드 터치 시 즉시 상세 점검표 모달 호출
+      container.querySelectorAll(".equip-card-item").forEach(card => {
+        card.addEventListener("click", () => {
+          const code = card.getAttribute("data-code");
           const equip = equipMasterList.find(e => e.code === code);
           if (!equip) return;
           openInspectionModal("EQUIP", code, `${equip.code} [${equip.mgmtNo}]`, `${equip.facility} ${equip.floor} ${equip.room} (${equip.detailLoc})`, equip.templateId);
@@ -1294,19 +1388,26 @@
 
         let statusBadge = `<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200">미점검</span>`;
         let borderClass = "border-slate-200";
+        let actionBtnText = "순찰 점검표 작성";
+        let btnBg = "bg-indigo-600 hover:bg-indigo-700 text-white";
+
         if (isPass) {
           statusBadge = `<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">순찰 양호</span>`;
           borderClass = "border-indigo-300 bg-indigo-50/20";
+          actionBtnText = "순찰 결과 확인/수정";
+          btnBg = "bg-indigo-600 text-white";
         } else if (isIssue) {
           statusBadge = `<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">순찰 이상</span>`;
           borderClass = "border-rose-300 bg-rose-50/20";
+          actionBtnText = "순찰 이상 수정";
+          btnBg = "bg-rose-600 text-white";
         }
 
         const equipCount = equipMasterList.filter(e => e.area === area.id).length;
         const tpl = TEMPLATES_MASTER.find(t => t.id === area.tplId) || TEMPLATES_MASTER[0];
 
         return `
-          <div class="bg-white rounded-2xl p-4 border ${borderClass} shadow-xs flex flex-col justify-between">
+          <div class="area-card-item cursor-pointer bg-white rounded-2xl p-4 border ${borderClass} shadow-xs hover:shadow-md transition-all flex flex-col justify-between" data-id="${area.id}">
             <div class="space-y-2">
               <div class="flex items-center justify-between">
                 <span class="px-2 py-0.5 rounded-lg text-xs font-black bg-indigo-50 text-indigo-700 border border-indigo-200 font-mono">${area.id}</span>
@@ -1327,55 +1428,20 @@
                 </div>
               ` : ''}
             </div>
-            <div class="pt-3.5 flex items-center gap-2">
-              <button type="button" class="btn-area-quick-pass flex-1 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl transition-colors" data-id="${area.id}">
-                ${isDone ? '점검 취소' : 'O 양호 체크'}
-              </button>
-              <button type="button" class="btn-open-area-detail px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl" data-id="${area.id}">
-                상세점검
+            <div class="pt-3.5 flex items-center">
+              <button type="button" class="w-full py-2 ${btnBg} font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 pointer-events-none">
+                <i class="fa-solid fa-clipboard-check text-xs"></i>
+                <span>${actionBtnText}</span>
               </button>
             </div>
           </div>
         `;
       }).join('');
 
-      container.querySelectorAll(".btn-area-quick-pass").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const id = btn.getAttribute("data-id");
-          const area = AREAS_MASTER.find(a => a.id === id);
-          if (!area) return;
-
-          const key = `AREA_${id}`;
-          if (inspectionRecords[key]) {
-            delete inspectionRecords[key];
-            showToast(`${area.name} 순찰점검 취소`);
-          } else {
-            const tpl = TEMPLATES_MASTER.find(t => t.id === area.tplId) || TEMPLATES_MASTER[0];
-            const checks = {};
-            tpl.items.forEach(it => { checks[it.id] = "O"; });
-
-            inspectionRecords[key] = {
-              mode: "AREA",
-              targetId: id,
-              title: `[${area.id}] ${area.name}`,
-              sub: area.desc,
-              status: "PASS",
-              checks: checks,
-              note: "",
-              inspector: currentInspectorProfile.name || "안전리더",
-              date: currentInspectorProfile.date || new Date().toISOString().split("T")[0],
-              timestamp: Date.now()
-            };
-            showToast(`${area.name} 순찰 [O 양호] 완료`);
-          }
-          saveRecords();
-          renderAreaCards();
-        });
-      });
-
-      container.querySelectorAll(".btn-open-area-detail").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const id = btn.getAttribute("data-id");
+      // MY AREA 카드 터치 시 모달 호출
+      container.querySelectorAll(".area-card-item").forEach(card => {
+        card.addEventListener("click", () => {
+          const id = card.getAttribute("data-id");
           const area = AREAS_MASTER.find(a => a.id === id);
           if (!area) return;
           openInspectionModal("AREA", id, `[${area.id}] ${area.name}`, area.desc, area.tplId);
@@ -1417,16 +1483,23 @@
 
         let statusBadge = `<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200">미점검</span>`;
         let borderClass = "border-slate-200";
+        let actionBtnText = "부서 점검표 작성";
+        let btnBg = "bg-amber-600 hover:bg-amber-700 text-white";
+
         if (isPass) {
           statusBadge = `<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">부서 양호</span>`;
           borderClass = "border-amber-300 bg-amber-50/20";
+          actionBtnText = "점검 결과 확인/수정";
+          btnBg = "bg-amber-600 text-white";
         } else if (isIssue) {
           statusBadge = `<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">부서 이상</span>`;
           borderClass = "border-rose-300 bg-rose-50/20";
+          actionBtnText = "부서 이상 수정";
+          btnBg = "bg-rose-600 text-white";
         }
 
         return `
-          <div class="bg-white rounded-2xl p-4 border ${borderClass} shadow-xs flex flex-col justify-between">
+          <div class="zone-card-item cursor-pointer bg-white rounded-2xl p-4 border ${borderClass} shadow-xs hover:shadow-md transition-all flex flex-col justify-between" data-id="${zone.id}">
             <div class="space-y-2">
               <div class="flex items-center justify-between">
                 <span class="px-2 py-0.5 rounded-lg text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">${zone.dept}</span>
@@ -1444,55 +1517,20 @@
                 </div>
               ` : ''}
             </div>
-            <div class="pt-3.5 flex items-center gap-2">
-              <button type="button" class="btn-zone-quick-pass flex-1 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-xs rounded-xl transition-colors" data-id="${zone.id}">
-                ${isDone ? '점검 취소' : 'O 양호 완료'}
-              </button>
-              <button type="button" class="btn-open-zone-detail px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl" data-id="${zone.id}">
-                점검표
+            <div class="pt-3.5 flex items-center">
+              <button type="button" class="w-full py-2 ${btnBg} font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 pointer-events-none">
+                <i class="fa-solid fa-clipboard-check text-xs"></i>
+                <span>${actionBtnText}</span>
               </button>
             </div>
           </div>
         `;
       }).join('');
 
-      container.querySelectorAll(".btn-zone-quick-pass").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const id = btn.getAttribute("data-id");
-          const zone = zoneMasterList.find(z => z.id === id);
-          if (!zone) return;
-
-          const key = `ZONE_${id}`;
-          if (inspectionRecords[key]) {
-            delete inspectionRecords[key];
-            showToast(`${zone.name} 점검 취소`);
-          } else {
-            const tpl = TEMPLATES_MASTER.find(t => t.id === "TPL_ZONE_DAILY") || TEMPLATES_MASTER[0];
-            const checks = {};
-            tpl.items.forEach(it => { checks[it.id] = "O"; });
-
-            inspectionRecords[key] = {
-              mode: "ZONE",
-              targetId: id,
-              title: `${zone.name} (${zone.dept})`,
-              sub: `${zone.facility} ${zone.floor}`,
-              status: "PASS",
-              checks: checks,
-              note: "",
-              inspector: currentInspectorProfile.name || `${zone.dept} 담당자`,
-              date: currentInspectorProfile.date || new Date().toISOString().split("T")[0],
-              timestamp: Date.now()
-            };
-            showToast(`${zone.name} 부서점검 [O 양호] 완료`);
-          }
-          saveRecords();
-          renderZoneCards();
-        });
-      });
-
-      container.querySelectorAll(".btn-open-zone-detail").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const id = btn.getAttribute("data-id");
+      // MY ZONE 카드 터치 시 모달 호출
+      container.querySelectorAll(".zone-card-item").forEach(card => {
+        card.addEventListener("click", () => {
+          const id = card.getAttribute("data-id");
           const zone = zoneMasterList.find(z => z.id === id);
           if (!zone) return;
           openInspectionModal("ZONE", id, `${zone.name} (${zone.dept})`, `${zone.facility} ${zone.floor}`, "TPL_ZONE_DAILY");
@@ -1578,18 +1616,19 @@
     }
 
     function renderMasterViews() {
-      // 1. 장비 마스터
       const tbodyEquip = document.getElementById("masterEquipTableBody");
       const search = (document.getElementById("masterEquipSearchInput")?.value || "").toLowerCase();
       const filtered = equipMasterList.filter(e => {
         if (!search) return true;
-        return (e.code + e.mgmtNo + e.facility + e.floor + e.room + e.name).toLowerCase().includes(search);
+        const major = e.majorCategory || "소화설비";
+        return (e.code + e.mgmtNo + e.facility + e.floor + e.room + e.name + major).toLowerCase().includes(search);
       });
 
-      tbodyEquip.innerHTML = filtered.map((e, idx) => `
+      tbodyEquip.innerHTML = filtered.map((e) => `
         <tr class="hover:bg-slate-50">
           <td class="p-2.5 font-mono font-bold text-slate-900">${e.code}</td>
           <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-rose-50 text-rose-700 font-bold">${e.mgmtNo}</span></td>
+          <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-amber-50 text-amber-800 font-semibold">${e.majorCategory || '소화설비'}</span></td>
           <td class="p-2.5 font-semibold">${e.name}</td>
           <td class="p-2.5 text-slate-600">${e.facility} ${e.floor} &rsaquo; ${e.room}</td>
           <td class="p-2.5 text-slate-500">${e.agent || '-'} (${e.amount || '-'})</td>
@@ -1612,7 +1651,67 @@
         });
       });
 
-      // 2. Zone 부서 매핑
+      // 설비 분류 체계 마스터 렌더링
+      const tbodyCategory = document.getElementById("masterCategoryTableBody");
+      if (tbodyCategory) {
+        tbodyCategory.innerHTML = categoryHierarchyList.map(cat => {
+          const matchCount = equipMasterList.filter(e => {
+            const m = e.majorCategory || "소화설비";
+            return m === cat.major && cat.subTypes.some(sub => (e.name || "").includes(sub));
+          }).length;
+          const tpl = TEMPLATES_MASTER.find(t => t.id === cat.defaultTpl) || TEMPLATES_MASTER[0];
+
+          return `
+            <tr class="hover:bg-slate-50">
+              <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-bold">${cat.major}</span></td>
+              <td class="p-2.5 font-bold text-slate-900">${cat.name}</td>
+              <td class="p-2.5">
+                <div class="flex flex-wrap gap-1 max-w-sm">
+                  ${cat.subTypes.map(st => `<span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-semibold">${st}</span>`).join('')}
+                </div>
+              </td>
+              <td class="p-2.5 text-indigo-600 font-semibold">${tpl.name}</td>
+              <td class="p-2.5 font-mono font-bold text-slate-700">${matchCount}대</td>
+              <td class="p-2.5 text-center whitespace-nowrap">
+                <button type="button" class="btn-edit-category-sub text-indigo-600 hover:underline font-bold mr-2" data-id="${cat.id}">종류추가</button>
+                <button type="button" class="btn-delete-category-group text-rose-600 hover:underline font-bold" data-id="${cat.id}">삭제</button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        tbodyCategory.querySelectorAll(".btn-edit-category-sub").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const id = btn.getAttribute("data-id");
+            const cat = categoryHierarchyList.find(c => c.id === id);
+            if (!cat) return;
+            const newSubType = prompt(`[${cat.major} > ${cat.name}]에 추가할 세부 설비 종류명을 입력하세요:`);
+            if (newSubType && newSubType.trim()) {
+              if (!cat.subTypes.includes(newSubType.trim())) {
+                cat.subTypes.push(newSubType.trim());
+                saveCategoryMaster();
+                populateEquipDropdownFilters();
+                renderMasterViews();
+                showToast(`${newSubType.trim()} 종류가 추가되었습니다.`);
+              }
+            }
+          });
+        });
+
+        tbodyCategory.querySelectorAll(".btn-delete-category-group").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const id = btn.getAttribute("data-id");
+            if (confirm("해당 분류 그룹을 삭제하시겠습니까?")) {
+              categoryHierarchyList = categoryHierarchyList.filter(c => c.id !== id);
+              saveCategoryMaster();
+              populateEquipDropdownFilters();
+              renderMasterViews();
+              showToast("분류 그룹이 삭제되었습니다.");
+            }
+          });
+        });
+      }
+
       const tbodyZone = document.getElementById("masterZoneTableBody");
       tbodyZone.innerHTML = zoneMasterList.map(z => `
         <tr class="hover:bg-slate-50">
@@ -1642,7 +1741,6 @@
         });
       });
 
-      // 3. 점검표 템플릿
       const tplContainer = document.getElementById("masterTplContainer");
       tplContainer.innerHTML = TEMPLATES_MASTER.map(tpl => `
         <div class="border border-slate-200 rounded-xl p-3.5 bg-slate-50/50 space-y-2">
@@ -1661,12 +1759,14 @@
     function switchMasterSubTab(tabName) {
       const views = {
         equip: document.getElementById("subViewEquipMaster"),
+        category: document.getElementById("subViewCategoryMaster"),
         zone: document.getElementById("subViewZoneMaster"),
         tpl: document.getElementById("subViewTplMaster"),
         sync: document.getElementById("subViewGoogleSync")
       };
       const buttons = {
         equip: document.getElementById("btnSubTabEquipMaster"),
+        category: document.getElementById("btnSubTabCategoryMaster"),
         zone: document.getElementById("btnSubTabZoneMaster"),
         tpl: document.getElementById("btnSubTabTplMaster"),
         sync: document.getElementById("btnSubTabGoogleSync")
@@ -1692,7 +1792,6 @@
       });
     }
 
-    // 구글 시트 URL 저장/로드 관리
     function getGoogleScriptUrl() {
       return localStorage.getItem("SAFETYCHECK_GOOGLE_SCRIPT_URL") || DEFAULT_GOOGLE_SCRIPT_URL;
     }
@@ -1700,15 +1799,10 @@
     function setGoogleScriptUrl(url) {
       const cleanUrl = (url || '').trim();
       localStorage.setItem("SAFETYCHECK_GOOGLE_SCRIPT_URL", cleanUrl);
-      
-      const input1 = document.getElementById("googleScriptUrlInput");
-      if (input1) input1.value = cleanUrl;
-
-      const input2 = document.getElementById("settingsGoogleUrlInput");
-      if (input2) input2.value = cleanUrl;
+      const input = document.getElementById("googleScriptUrlInput");
+      if (input) input.value = cleanUrl;
     }
 
-    // 1. 구글시트에서 기준정보 가져오기 (Pull)
     async function syncFromGoogleSheets() {
       const url = getGoogleScriptUrl();
       if (!url) {
@@ -1731,7 +1825,6 @@
         
         const fetchedItems = await res.json();
         if (Array.isArray(fetchedItems) && fetchedItems.length > 0) {
-          // 데이터 매핑 및 저장
           equipMasterList = fetchedItems.map(item => ({
             code: item.code || "",
             facility: item.facility || "",
@@ -1772,7 +1865,6 @@
           syncBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-600";
         }
       } catch (err) {
-        console.error("Google Sheets Fetch Error:", err);
         showToast("구글시트 동기화 실패: URL 또는 배포 권한을 확인하세요.", false);
         syncBadge.textContent = "오류 발생";
         syncBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800";
@@ -1782,7 +1874,6 @@
       }
     }
 
-    // 2. 웹앱 데이터를 구글시트로 내보내기/덮어쓰기 (Push)
     async function syncToGoogleSheets() {
       const url = getGoogleScriptUrl();
       if (!url) {
@@ -1805,9 +1896,9 @@
           items: equipMasterList
         };
 
-        const res = await fetch(url, {
+        await fetch(url, {
           method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" }, // CORS preflight 우회용
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload)
         });
 
@@ -1819,7 +1910,6 @@
         syncBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800";
         showToast(`웹앱 기준정보 ${equipMasterList.length}건이 구글시트에 안전하게 반영되었습니다!`);
       } catch (err) {
-        console.error("Google Sheets Push Error:", err);
         showToast("구글시트 전송 실패: 네트워크 및 배포 권한을 확인하세요.", false);
         syncBadge.textContent = "전송 오류";
         syncBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800";
@@ -1829,7 +1919,6 @@
       }
     }
 
-    // 3. 구글시트에서 '점검기록' 가져오기 (PC에서 구글시트에 일괄 작성한 내용 -> 웹앱 완료 반영)
     async function syncRecordsFromGoogleSheets() {
       const url = getGoogleScriptUrl();
       if (!url) {
@@ -1844,7 +1933,6 @@
         btn.disabled = true;
         btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>가져오는 중...</span>`;
 
-        // action=getRecords 쿼리로 점검기록 시트 데이터 호출
         const fetchUrl = url + (url.includes("?") ? "&" : "?") + "action=getRecords";
         const res = await fetch(fetchUrl, { method: "GET" });
         if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
@@ -1857,7 +1945,6 @@
             const mode = r.mode || (r.targetId.startsWith("A") && r.targetId.length <= 4 ? "AREA" : (r.targetId.startsWith("ZONE") ? "ZONE" : "EQUIP"));
             const key = `${mode}_${r.targetId}`;
 
-            // 기본 체크리스트 생성
             const checks = {};
             for (let i = 1; i <= 7; i++) checks[`FE_${i}`] = r.status === "PASS" ? "O" : "△";
 
@@ -1888,7 +1975,6 @@
           showToast("구글시트 '점검기록' 시트에 등록된 데이터가 없습니다.", false);
         }
       } catch (err) {
-        console.error("Fetch Records Error:", err);
         showToast("점검기록 가져오기 실패: 구글시트에 '점검기록' 탭이 있는지 확인하세요.", false);
       } finally {
         btn.disabled = false;
@@ -1896,7 +1982,6 @@
       }
     }
 
-    // 4. 웹앱의 '점검기록'을 구글시트로 업로드 (웹앱 -> 구글시트 백업)
     async function syncRecordsToGoogleSheets() {
       const url = getGoogleScriptUrl();
       if (!url) {
@@ -1931,7 +2016,7 @@
           }))
         };
 
-        const res = await fetch(url, {
+        await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload)
@@ -1939,7 +2024,6 @@
 
         showToast(`웹앱 점검기록 ${records.length}건이 구글시트 '점검기록' 시트에 저장되었습니다!`);
       } catch (err) {
-        console.error("Push Records Error:", err);
         showToast("점검기록 업로드 실패: 네트워크 및 배포 권한을 확인하세요.", false);
       } finally {
         btn.disabled = false;
@@ -2033,18 +2117,15 @@
 
       currentMode = mode;
 
-      // 뷰 가시성 제어
       document.getElementById("viewEquipSection").classList.toggle("hidden", mode !== "equip");
       document.getElementById("viewAreaSection").classList.toggle("hidden", mode !== "area");
       document.getElementById("viewZoneSection").classList.toggle("hidden", mode !== "zone");
       document.getElementById("viewHistorySection").classList.toggle("hidden", mode !== "history");
       document.getElementById("viewMasterSection").classList.toggle("hidden", mode !== "master");
 
-      // 헤더 뱃지
       const titles = { equip: "1. 시설장비", area: "2. MY AREA", zone: "3. MY ZONE", history: "점검 기록 📊", master: "기준정보 🔒" };
       document.getElementById("activeModeBadge").textContent = titles[mode] || mode;
 
-      // 탭 활성 스타일 동기화
       document.querySelectorAll(".mode-tab-btn").forEach(btn => {
         const btnMode = btn.getAttribute("data-mode");
         if (btnMode === mode) {
@@ -2100,8 +2181,8 @@
 
       const key = `${activeModal.mode}_${activeModal.targetId}`;
       const note = document.getElementById("modalNoteInput").value.trim();
-      const inspector = document.getElementById("modalInspectorInput").value.trim() || "담당자";
-      const date = document.getElementById("modalDateInput").value || new Date().toISOString().split("T")[0];
+      const inspector = document.getElementById("modalInspectorInput").value.trim() || currentInspectorProfile.name || "홍길동";
+      const date = document.getElementById("modalDateInput").value || currentInspectorProfile.date || new Date().toISOString().split("T")[0];
 
       let hasIssue = Object.values(activeModal.checks).some(val => val === "X" || val === "△");
       if (note.includes("불량") || note.includes("파손") || note.includes("누수")) hasIssue = true;
@@ -2144,12 +2225,23 @@
     document.getElementById("btnCloseInspectionModal")?.addEventListener("click", closeInspectionModal);
     document.getElementById("btnCancelModal")?.addEventListener("click", closeInspectionModal);
 
+    // 모달 내부 [전 항목 O 양호] 빠른 선택 버튼
+    document.getElementById("btnModalSetAllPass")?.addEventListener("click", () => {
+      if (!activeModal.tpl) return;
+      activeModal.tpl.items.forEach(item => {
+        activeModal.checks[item.id] = "O";
+      });
+      renderModalChecklistRows();
+      showToast("모든 항목이 [O 양호]로 설정되었습니다. '점검 완료 저장'을 누르세요.");
+    });
+
     // 신규 설비 등록 간이 모달 핸들러
     document.getElementById("btnOpenNewEquipModal")?.addEventListener("click", () => {
       const code = prompt("등록할 설비 QR/장비위치코드를 입력하세요 (예: WH01B0101F5FE901):");
       if (!code || !code.trim()) return;
+      const major = prompt("상위 카테고리(대분류)를 입력하세요 (예: 소화설비, 경보설비, 피난구조설비, 방호/환경안전):", "소화설비") || "소화설비";
+      const name = prompt("장비 세부 명칭을 입력하세요 (예: 분말 소화기, 옥내소화전):", "분말 소화기") || "분말 소화기";
       const mgmtNo = prompt("관리번호를 입력하세요 (예: A06-99):", "A00-01") || "A00-01";
-      const name = prompt("장비 명칭을 입력하세요:", "분말 소화기") || "분말 소화기";
       const room = prompt("설치위치(룸명)를 입력하세요:", "[B0101] 지하 크린룸") || "[B0101] 지하 크린룸";
       const area = prompt("My Area 코드를 입력하세요 (A00~A06, RA00):", "A00") || "A00";
 
@@ -2160,6 +2252,7 @@
         room: room.trim(),
         equipCode: "F5FE1",
         no: "99",
+        majorCategory: major.trim(),
         name: name.trim(),
         detailLoc: "현장 신규 등록",
         agent: "제1인산암모늄",
@@ -2168,103 +2261,22 @@
         area: area.trim(),
         mgmtNo: mgmtNo.trim(),
         dept: "환경안전팀",
-        templateId: "TPL_FIRE_EXT"
+        templateId: name.includes("소화전") ? "TPL_HYDRANT" : "TPL_FIRE_EXT"
       });
 
       saveEquipMaster();
       deriveZonesAndAreasFromEquips();
+      populateEquipDropdownFilters();
       renderMasterViews();
       renderEquipCards();
       showToast(`${code} 설비가 신규 등록되었습니다.`);
     });
 
-    // 일괄 양호 버튼들
-    document.getElementById("btnEquipBatchPass").addEventListener("click", () => {
-      const list = getFilteredEquips();
-      if (list.length === 0) return;
-
-      list.forEach(equip => {
-        const key = `EQUIP_${equip.code}`;
-        const tpl = TEMPLATES_MASTER.find(t => t.id === equip.templateId) || TEMPLATES_MASTER[0];
-        const checks = {};
-        tpl.items.forEach(it => { checks[it.id] = "O"; });
-
-        inspectionRecords[key] = {
-          mode: "EQUIP",
-          targetId: equip.code,
-          title: `${equip.name} (${equip.mgmtNo})`,
-          sub: `${equip.facility} ${equip.floor} ${equip.room}`,
-          status: "PASS",
-          checks: checks,
-          note: "",
-          inspector: currentInspectorProfile.name || "담당자",
-          date: currentInspectorProfile.date || new Date().toISOString().split("T")[0],
-          timestamp: Date.now()
-        };
-      });
-
-      saveRecords();
-      renderEquipCards();
-      showToast(`${list.length}개 설비 전체 [O 양호] 처리 완료`);
-    });
-
-    document.getElementById("btnAreaBatchPass").addEventListener("click", () => {
-      AREAS_MASTER.forEach(area => {
-        const key = `AREA_${area.id}`;
-        const tpl = TEMPLATES_MASTER.find(t => t.id === area.tplId) || TEMPLATES_MASTER[0];
-        const checks = {};
-        tpl.items.forEach(it => { checks[it.id] = "O"; });
-
-        inspectionRecords[key] = {
-          mode: "AREA",
-          targetId: area.id,
-          title: `[${area.id}] ${area.name}`,
-          sub: area.desc,
-          status: "PASS",
-          checks: checks,
-          note: "",
-          inspector: currentInspectorProfile.name || "안전리더",
-          date: currentInspectorProfile.date || new Date().toISOString().split("T")[0],
-          timestamp: Date.now()
-        };
-      });
-
-      saveRecords();
-      renderAreaCards();
-      showToast("전체 MY AREA [O 양호] 순찰 완료");
-    });
-
-    document.getElementById("btnZoneBatchPass").addEventListener("click", () => {
-      const list = selectedDept ? zoneMasterList.filter(z => z.dept === selectedDept) : zoneMasterList;
-      list.forEach(zone => {
-        const key = `ZONE_${zone.id}`;
-        const tpl = TEMPLATES_MASTER.find(t => t.id === "TPL_ZONE_DAILY") || TEMPLATES_MASTER[0];
-        const checks = {};
-        tpl.items.forEach(it => { checks[it.id] = "O"; });
-
-        inspectionRecords[key] = {
-          mode: "ZONE",
-          targetId: zone.id,
-          title: `${zone.name} (${zone.dept})`,
-          sub: `${zone.facility} ${zone.floor}`,
-          status: "PASS",
-          checks: checks,
-          note: "",
-          inspector: currentInspectorProfile.name || `${zone.dept} 담당자`,
-          date: currentInspectorProfile.date || new Date().toISOString().split("T")[0],
-          timestamp: Date.now()
-        };
-      });
-
-      saveRecords();
-      renderZoneCards();
-      showToast(`${list.length}개 MY ZONE 부서점검 [O 양호] 완료`);
-    });
-
     // 필터 리셋 버튼
     document.getElementById("btnEquipResetFilter").addEventListener("click", () => {
       selectedArea = "";
-      document.getElementById("equipFilterCategory").value = "";
+      if (document.getElementById("equipFilterMajorCat")) document.getElementById("equipFilterMajorCat").value = "";
+      if (document.getElementById("equipFilterCategory")) document.getElementById("equipFilterCategory").value = "";
       document.getElementById("equipFilterFacility").value = "";
       document.getElementById("equipFilterFloor").value = "";
       document.getElementById("equipFilterRoom").value = "";
@@ -2275,11 +2287,17 @@
       updateStatusMetrics();
     });
 
+    // 대분류 변경 시 소분류 종속 필터 재구성 이벤트
+    document.getElementById("equipFilterMajorCat")?.addEventListener("change", () => {
+      populateEquipDropdownFilters();
+      renderEquipCards();
+    });
+
     // 드롭다운 및 검색 이벤트
     ["equipFilterCategory", "equipFilterFacility", "equipFilterFloor", "equipFilterRoom"].forEach(id => {
-      document.getElementById(id).addEventListener("change", renderEquipCards);
+      document.getElementById(id)?.addEventListener("change", renderEquipCards);
     });
-    document.getElementById("equipFilterSearch").addEventListener("input", renderEquipCards);
+    document.getElementById("equipFilterSearch")?.addEventListener("input", renderEquipCards);
 
     // 점검기록 필터 이벤트
     ["historyFilterStartDate", "historyFilterEndDate", "historyFilterMode", "historyFilterStatus"].forEach(id => {
@@ -2297,7 +2315,7 @@
     document.getElementById("btnExportData").addEventListener("click", exportRecordsToCSV);
     document.getElementById("btnDownloadHistoryCSV").addEventListener("click", exportRecordsToCSV);
 
-    // 상단 톱니바퀴 클릭 시: 관리자 비밀번호 인증 후 바로 관리자/환경설정 모드로 전환
+    // 상단 톱니바퀴 클릭 시: 관리자 비밀번호 인증 모달 표시
     document.getElementById("btnOpenSettings")?.addEventListener("click", () => {
       if (isMasterUnlocked) {
         switchMode("master");
@@ -2340,12 +2358,13 @@
 
     // 기준정보 서브탭 바인딩
     document.getElementById("btnSubTabEquipMaster")?.addEventListener("click", () => switchMasterSubTab("equip"));
+    document.getElementById("btnSubTabCategoryMaster")?.addEventListener("click", () => switchMasterSubTab("category"));
     document.getElementById("btnSubTabZoneMaster")?.addEventListener("click", () => switchMasterSubTab("zone"));
     document.getElementById("btnSubTabTplMaster")?.addEventListener("click", () => switchMasterSubTab("tpl"));
     document.getElementById("btnSubTabGoogleSync")?.addEventListener("click", () => switchMasterSubTab("sync"));
     document.getElementById("masterEquipSearchInput")?.addEventListener("input", renderMasterViews);
 
-    // 구글 시트 연동 이벤트 리스너 (기준정보 관리자 탭 내)
+    // 구글 시트 연동 이벤트 리스너
     document.getElementById("btnSaveGoogleUrl")?.addEventListener("click", () => {
       const val = document.getElementById("googleScriptUrlInput")?.value || "";
       setGoogleScriptUrl(val);
@@ -2367,17 +2386,17 @@
       document.getElementById("netStatusBadge").className = "flex items-center space-x-1 px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-amber-50 border border-amber-200 text-amber-700";
     });
 
-    // 메인 페이지 점검자 정보 바 초기화 및 이벤트
+    // 메인 페이지 점검자 정보 바 제어
     function setupMainInspectorControls() {
       const nameInput = document.getElementById("mainInspectorName");
       const dateInput = document.getElementById("mainInspectionDate");
       const saveBtn = document.getElementById("btnSaveInspectorProfile");
 
-      if (nameInput) nameInput.value = currentInspectorProfile.name || "담당자";
+      if (nameInput) nameInput.value = currentInspectorProfile.name || "홍길동";
       if (dateInput) dateInput.value = currentInspectorProfile.date || new Date().toISOString().split("T")[0];
 
       const saveProfile = (silent = false) => {
-        currentInspectorProfile.name = nameInput?.value.trim() || "담당자";
+        currentInspectorProfile.name = nameInput?.value.trim() || "홍길동";
         currentInspectorProfile.date = dateInput?.value || new Date().toISOString().split("T")[0];
         try {
           localStorage.setItem("SAFETYCHECK_INSPECTOR_PROFILE", JSON.stringify(currentInspectorProfile));
@@ -2391,22 +2410,16 @@
     }
 
     window.onload = function() {
-      // 저장된 구글 스크립트 URL 복원
       const savedGoogleUrl = getGoogleScriptUrl();
       const googleInput = document.getElementById("googleScriptUrlInput");
-      const settingsInput = document.getElementById("settingsGoogleUrlInput");
       if (googleInput) googleInput.value = savedGoogleUrl;
-      if (settingsInput) settingsInput.value = savedGoogleUrl;
 
       const lastSync = localStorage.getItem("SAFETYCHECK_GOOGLE_LAST_SYNC");
       if (lastSync && document.getElementById("lastGoogleSyncTime")) {
         document.getElementById("lastGoogleSyncTime").textContent = lastSync;
       }
 
-      // 메인 점검자 프로필 바 컨트롤 초기화
       setupMainInspectorControls();
-
-      // 설비 기준정보를 바탕으로 Zone 및 Area 자동 산입
       deriveZonesAndAreasFromEquips();
 
       renderEquipAreaChips();
