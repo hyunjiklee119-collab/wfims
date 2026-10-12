@@ -1085,6 +1085,30 @@
       inspectionRecords = {};
     }
 
+    // 날짜를 엄격한 YYYY-MM-DD 형식으로 변환 및 보정하는 헬퍼 함수
+    function formatToYYYYMMDD(dateVal) {
+      if (!dateVal) return new Date().toISOString().split("T")[0];
+      if (dateVal instanceof Date) {
+        const y = dateVal.getFullYear();
+        const m = String(dateVal.getMonth() + 1).padStart(2, '0');
+        const d = String(dateVal.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      }
+      const str = String(dateVal).trim();
+      const parts = str.split(/[-./\s]/).filter(Boolean);
+      if (parts.length >= 3 && parts[0].length === 4) {
+        const y = parts[0];
+        const m = parts[1].padStart(2, '0');
+        const d = parts[2].padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      }
+      const digits = str.replace(/[^\d]/g, '');
+      if (digits.length === 8) {
+        return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
+      }
+      return str;
+    }
+
     // 점검표 템플릿 마스터 로드
     let templateMasterList = [];
     try {
@@ -1259,7 +1283,7 @@
 
       activeModal.note = existing?.note || "";
       activeModal.inspector = existing?.inspector || currentInspectorProfile.name || "이현직";
-      activeModal.date = existing?.date || currentInspectorProfile.date || new Date().toISOString().split("T")[0];
+      activeModal.date = formatToYYYYMMDD(existing?.date || currentInspectorProfile.date || new Date().toISOString().split("T")[0]);
 
       document.getElementById("modalTargetTitle").textContent = `${targetId} (${name || '설비'})`;
       document.getElementById("modalTargetSub").textContent = sub;
@@ -1615,7 +1639,7 @@
 
                 ${isDone ? `
                   <div class="pt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] sm:text-[11px]">
-                    <span class="text-slate-500"><i class="fa-solid fa-calendar-check text-emerald-500 mr-1"></i>${rec.date} (${rec.inspector})</span>
+                    <span class="text-slate-500"><i class="fa-solid fa-calendar-check text-emerald-500 mr-1"></i>${formatToYYYYMMDD(rec.date)} (${rec.inspector})</span>
                     ${rec.note ? `<span class="text-rose-600 font-semibold bg-rose-50 px-2 py-0.5 rounded border border-rose-100">특이: ${rec.note}</span>` : ''}
                   </div>
                 ` : ''}
@@ -1685,7 +1709,7 @@
               </div>
               ${isDone ? `
                 <div class="text-xs text-slate-500 pt-1 border-t border-slate-100">
-                  <span>점검자: ${rec.inspector} (${rec.date})</span>
+                  <span>점검자: ${rec.inspector} (${formatToYYYYMMDD(rec.date)})</span>
                   ${rec.note ? `<p class="text-rose-600 font-bold mt-0.5">특이사항: ${rec.note}</p>` : ''}
                 </div>
               ` : ''}
@@ -1773,7 +1797,7 @@
               <p class="text-[11px] text-slate-500 font-medium">점검표: <b class="text-amber-700">MY ZONE 부서 자율 점검표</b></p>
               ${isDone ? `
                 <div class="text-xs text-slate-500 pt-1 border-t border-slate-100">
-                  <span>점검자: ${rec.inspector} (${rec.date})</span>
+                  <span>점검자: ${rec.inspector} (${formatToYYYYMMDD(rec.date)})</span>
                   ${rec.note ? `<p class="text-rose-600 font-bold mt-0.5">특이사항: ${rec.note}</p>` : ''}
                 </div>
               ` : ''}
@@ -1874,7 +1898,7 @@
           <div class="bg-white rounded-xl p-3 border ${cardBorder} shadow-2xs space-y-2">
             <div class="flex items-center justify-between gap-1.5 flex-wrap">
               <div class="flex items-center gap-1.5">
-                <span class="font-mono text-xs font-bold text-slate-500">${rec.date}</span>
+                <span class="font-mono text-xs font-bold text-slate-500">${formatToYYYYMMDD(rec.date)}</span>
                 ${modeBadge}
                 ${rec.mgmtNo ? `<span class="px-1.5 py-0.5 rounded text-[11px] font-bold font-mono bg-rose-50 text-rose-700 border border-rose-200">${rec.mgmtNo}</span>` : ''}
               </div>
@@ -1925,7 +1949,7 @@
 
           return `
             <tr class="hover:bg-slate-50 transition-colors">
-              <td class="p-2.5 font-mono text-slate-600 whitespace-nowrap">${rec.date}</td>
+              <td class="p-2.5 font-mono text-slate-600 whitespace-nowrap">${formatToYYYYMMDD(rec.date)}</td>
               <td class="p-2.5 whitespace-nowrap">${modeBadge}</td>
               <td class="p-2.5 font-bold font-mono text-rose-700 whitespace-nowrap">${rec.mgmtNo || '-'}</td>
               <td class="p-2.5 font-mono text-slate-900 whitespace-nowrap">${rec.targetId}</td>
@@ -1967,7 +1991,7 @@
         }
 
         const row = [
-          clean(r.date),
+          clean(formatToYYYYMMDD(r.date)),
           clean(r.mode),
           clean(r.targetId),
           clean(r.mgmtNo || ""),
@@ -2008,7 +2032,7 @@
             const val = checks[it.id] !== undefined ? checks[it.id] : "O";
             const isAbnormal = (val === "X" || val === "△") ? "이상" : "정상";
             const row = [
-              clean(r.date),
+              clean(formatToYYYYMMDD(r.date)),
               clean(r.mode),
               clean(r.targetId),
               clean(r.mgmtNo || ""),
@@ -2027,7 +2051,7 @@
         }
 
         const noteRow = [
-          clean(r.date),
+          clean(formatToYYYYMMDD(r.date)),
           clean(r.mode),
           clean(r.targetId),
           clean(r.mgmtNo || ""),
@@ -2107,7 +2131,7 @@
             while (items.length < 10) items.push("");
 
             return {
-              date: r.date,
+              date: formatToYYYYMMDD(r.date),
               mode: r.mode,
               targetId: r.targetId,
               mgmtNo: r.mgmtNo || "",
@@ -2196,7 +2220,7 @@
               note: r.note || "",
               templateName: r.templateName || "",
               inspector: r.inspector || "PC담당자",
-              date: r.date || new Date().toISOString().split("T")[0],
+              date: formatToYYYYMMDD(r.date || new Date().toISOString().split("T")[0]),
               timestamp: Date.now()
             };
             updatedCount++;
@@ -2956,7 +2980,7 @@
       const key = `${activeModal.mode}_${activeModal.targetId}`;
       const note = document.getElementById("modalNoteInput").value.trim();
       const inspector = document.getElementById("modalInspectorInput").value.trim() || currentInspectorProfile.name || "이현직";
-      const date = document.getElementById("modalDateInput").value || currentInspectorProfile.date || new Date().toISOString().split("T")[0];
+      const date = formatToYYYYMMDD(document.getElementById("modalDateInput").value || currentInspectorProfile.date || new Date().toISOString().split("T")[0]);
 
       let hasIssue = Object.values(activeModal.checks).some(val => val === "X" || val === "△");
       if (note.includes("불량") || note.includes("파손") || note.includes("누수")) hasIssue = true;
@@ -3345,11 +3369,11 @@
       const saveBtn = document.getElementById("btnSaveInspectorProfile");
 
       if (nameInput) nameInput.value = currentInspectorProfile.name || "이현직";
-      if (dateInput) dateInput.value = currentInspectorProfile.date || new Date().toISOString().split("T")[0];
+      if (dateInput) dateInput.value = formatToYYYYMMDD(currentInspectorProfile.date || new Date().toISOString().split("T")[0]);
 
       const saveProfile = (silent = false) => {
         currentInspectorProfile.name = nameInput?.value.trim() || "이현직";
-        currentInspectorProfile.date = dateInput?.value || new Date().toISOString().split("T")[0];
+        currentInspectorProfile.date = formatToYYYYMMDD(dateInput?.value || new Date().toISOString().split("T")[0]);
         try {
           localStorage.setItem("SAFETYCHECK_INSPECTOR_PROFILE", JSON.stringify(currentInspectorProfile));
         } catch(e) {}
