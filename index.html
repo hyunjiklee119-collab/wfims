@@ -11,7 +11,7 @@
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
-  <!-- Pretendard Font -->
+  <!-- Pretendard & JetBrains Mono Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   
   <style>
@@ -208,52 +208,62 @@
     <!-- ==================== 1. 시설·장비 예방 점검 뷰 ==================== -->
     <div id="viewEquipSection" class="space-y-3.5 sm:space-y-4 flex flex-col flex-1">
       <section class="bg-white rounded-2xl p-3.5 sm:p-4 shadow-xs border border-slate-200/90 space-y-3">
-        <!-- My Area 빠른 선택 칩 -->
-        <div>
-          <div class="flex items-center justify-between mb-1.5">
-            <label class="text-xs font-black text-slate-700 flex items-center gap-1.5">
-              <i class="fa-solid fa-location-dot text-rose-500"></i>
-              <span>MY AREA 빠른 선택</span>
+        <!-- 계층형 필터 드롭다운 (MY AREA 드롭다운 통합 + 대분류/세부종류 연동) -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2 sm:gap-2.5">
+          <!-- 1. MY AREA 구역 선택 드롭다운 (칩에서 드롭다운으로 전환) -->
+          <div class="col-span-2 sm:col-span-1 lg:col-span-1">
+            <label class="block text-[10px] sm:text-[11px] font-bold text-rose-700 mb-0.5 flex items-center gap-1">
+              <i class="fa-solid fa-location-dot text-rose-500 text-[10px]"></i>
+              <span>MY AREA 선택</span>
             </label>
-            <span class="text-[10px] sm:text-[11px] text-slate-400 font-medium">터치 시 해당 구역 설비 필터링</span>
+            <select id="equipFilterArea" class="w-full bg-rose-50/40 border border-rose-200 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-rose-500 focus:outline-none">
+              <option value="">전체 MY AREA</option>
+            </select>
           </div>
-          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar touch-pan-x" id="equipAreaChipsContainer"></div>
-        </div>
 
-        <!-- 계층형 필터 드롭다운 (대분류 ➔ 세부종류 종속 연동) -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5 pt-1">
+          <!-- 2. 상위 카테고리 (대분류) -->
           <div>
             <label class="block text-[10px] sm:text-[11px] font-bold text-slate-500 mb-0.5">상위 카테고리 (대분류)</label>
             <select id="equipFilterMajorCat" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-rose-500 focus:outline-none">
               <option value="">전체 대분류</option>
             </select>
           </div>
+
+          <!-- 3. 설비 세부 종류 -->
           <div>
             <label class="block text-[10px] sm:text-[11px] font-bold text-slate-500 mb-0.5">설비 세부 종류</label>
             <select id="equipFilterCategory" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-rose-500 focus:outline-none">
               <option value="">전체 세부종류</option>
             </select>
           </div>
+
+          <!-- 4. 사업장 -->
           <div>
             <label class="block text-[10px] sm:text-[11px] font-bold text-slate-500 mb-0.5">사업장</label>
             <select id="equipFilterFacility" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-rose-500 focus:outline-none">
               <option value="">전체 사업장</option>
             </select>
           </div>
+
+          <!-- 5. 층수 -->
           <div>
             <label class="block text-[10px] sm:text-[11px] font-bold text-slate-500 mb-0.5">층수 (Floor)</label>
             <select id="equipFilterFloor" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-rose-500 focus:outline-none">
               <option value="">전체 층수</option>
             </select>
           </div>
+
+          <!-- 6. 설치 룸 / 상세위치 -->
           <div>
             <label class="block text-[10px] sm:text-[11px] font-bold text-slate-500 mb-0.5">설치 룸 / 상세위치</label>
             <select id="equipFilterRoom" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-rose-500 focus:outline-none">
               <option value="">전체 룸/구역</option>
             </select>
           </div>
+
+          <!-- 7. 빠른 검색 -->
           <div class="col-span-2 sm:col-span-1 lg:col-span-1">
-            <label class="block text-[10px] sm:text-[11px] font-bold text-slate-500 mb-0.5">빠른 검색 (QR/번호/위치)</label>
+            <label class="block text-[10px] sm:text-[11px] font-bold text-slate-500 mb-0.5">빠른 검색 (QR/번호/명칭)</label>
             <div class="relative">
               <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
               <input type="text" id="equipFilterSearch" placeholder="코드/번호/명칭..." 
@@ -275,7 +285,7 @@
         </div>
       </section>
 
-      <!-- 장비 카드 리스트 (터치 시 상세 점검표 팝업) -->
+      <!-- 장비 카드 리스트 (데스크톱 고밀도 가로형 + 모바일 반응형) -->
       <section id="equipCardListContainer" class="space-y-2.5 sm:space-y-3 pb-24"></section>
     </div>
 
@@ -1316,6 +1326,7 @@
     }
 
     function getFilteredEquips() {
+      const areaVal = document.getElementById("equipFilterArea")?.value || selectedArea || "";
       const majorCat = document.getElementById("equipFilterMajorCat")?.value || "";
       const category = document.getElementById("equipFilterCategory")?.value || "";
       const facility = document.getElementById("equipFilterFacility")?.value || "";
@@ -1325,7 +1336,7 @@
 
       return equipMasterList.filter(item => {
         const itemMajor = item.majorCategory || "소화설비";
-        if (selectedArea && item.area !== selectedArea) return false;
+        if (areaVal && item.area !== areaVal) return false;
         if (majorCat && itemMajor !== majorCat) return false;
         if (category && item.name !== category && !item.name.includes(category)) return false;
         if (facility && item.facility !== facility) return false;
@@ -1343,49 +1354,35 @@
       });
     }
 
-    function renderEquipAreaChips() {
-      const container = document.getElementById("equipAreaChipsContainer");
-      const areas = ["전체", "A00", "A01", "A02", "A03", "A04", "A05", "A06", "RA00"];
-
-      container.innerHTML = areas.map(area => {
-        const isAll = area === "전체";
-        const isSelected = isAll ? !selectedArea : selectedArea === area;
-        const count = isAll ? equipMasterList.length : equipMasterList.filter(e => e.area === area).length;
-
-        return `
-          <button type="button" class="btn-area-chip px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${isSelected ? 'bg-rose-600 text-white shadow-sm shadow-rose-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}" data-area="${isAll ? '' : area}">
-            ${area} <span class="text-[10px] opacity-80 font-mono font-normal">(${count})</span>
-          </button>
-        `;
-      }).join('');
-
-      container.querySelectorAll(".btn-area-chip").forEach(btn => {
-        btn.addEventListener("click", () => {
-          selectedArea = btn.getAttribute("data-area");
-          renderEquipAreaChips();
-          populateEquipDropdownFilters();
-          renderEquipCards();
-          updateStatusMetrics();
-        });
-      });
-    }
-
     function populateEquipDropdownFilters() {
-      const baseList = selectedArea ? equipMasterList.filter(e => e.area === selectedArea) : equipMasterList;
-
+      const areaSelect = document.getElementById("equipFilterArea");
       const majorSelect = document.getElementById("equipFilterMajorCat");
       const catSelect = document.getElementById("equipFilterCategory");
       const facilitySelect = document.getElementById("equipFilterFacility");
       const floorSelect = document.getElementById("equipFilterFloor");
       const roomSelect = document.getElementById("equipFilterRoom");
 
+      const currentArea = areaSelect?.value || selectedArea || "";
       const currentMajor = majorSelect?.value || "";
       const currentCat = catSelect?.value || "";
       const currentFacility = facilitySelect?.value || "";
       const currentFloor = floorSelect?.value || "";
       const currentRoom = roomSelect?.value || "";
 
-      // 대분류 목록 추출
+      // 1. MY AREA 드롭다운 구성 (코드 + 명칭 + 설비 수량)
+      if (areaSelect) {
+        let areaOptions = `<option value="">전체 MY AREA (${equipMasterList.length}개소)</option>`;
+        AREAS_MASTER.forEach(a => {
+          const count = equipMasterList.filter(e => e.area === a.id).length;
+          areaOptions += `<option value="${a.id}">#${a.id} - ${a.name} (${count}개소)</option>`;
+        });
+        areaSelect.innerHTML = areaOptions;
+        if (currentArea) areaSelect.value = currentArea;
+      }
+
+      const baseList = currentArea ? equipMasterList.filter(e => e.area === currentArea) : equipMasterList;
+
+      // 2. 대분류 목록 추출
       const allMajors = [...new Set([
         ...categoryHierarchyList.map(c => c.major),
         ...baseList.map(e => e.majorCategory || "소화설비")
@@ -1396,7 +1393,7 @@
         if (allMajors.includes(currentMajor)) majorSelect.value = currentMajor;
       }
 
-      // 선택된 대분류에 따른 소분류/세부종류 목록 종속 추출
+      // 3. 선택된 대분류에 따른 소분류/세부종류 목록 종속 추출
       let availableCats = [];
       if (majorSelect?.value) {
         const groups = categoryHierarchyList.filter(c => c.major === majorSelect.value);
@@ -1457,30 +1454,30 @@
         const isPass = rec?.status === "PASS";
         const isIssue = rec?.status === "ISSUE";
 
-        let statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200">미점검</span>`;
-        let borderClass = "border-slate-200/90";
+        let statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200 shrink-0">미점검</span>`;
+        let borderClass = "border-slate-200/90 hover:border-slate-300";
         let actionBtn = `
-          <button type="button" class="btn-open-equip-detail shrink-0 px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-1 active:scale-95" data-code="${item.code}">
-            <i class="fa-solid fa-clipboard-check text-[11px]"></i>
+          <button type="button" class="btn-open-equip-detail shrink-0 px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-1.5 active:scale-95" data-code="${item.code}">
+            <i class="fa-solid fa-clipboard-check text-xs"></i>
             <span>점검표 작성</span>
           </button>
         `;
 
         if (isPass) {
-          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">양호 완료</span>`;
-          borderClass = "border-emerald-300 bg-emerald-50/20";
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 shrink-0">양호 완료</span>`;
+          borderClass = "border-emerald-300 bg-emerald-50/15";
           actionBtn = `
-            <button type="button" class="btn-open-equip-detail shrink-0 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-1 active:scale-95" data-code="${item.code}">
-              <i class="fa-solid fa-check text-[11px]"></i>
+            <button type="button" class="btn-open-equip-detail shrink-0 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-1.5 active:scale-95" data-code="${item.code}">
+              <i class="fa-solid fa-check text-xs"></i>
               <span>점검 완료됨</span>
             </button>
           `;
         } else if (isIssue) {
-          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-200">이상 발생</span>`;
-          borderClass = "border-rose-300 bg-rose-50/20";
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-200 shrink-0">이상 발생</span>`;
+          borderClass = "border-rose-300 bg-rose-50/15";
           actionBtn = `
-            <button type="button" class="btn-open-equip-detail shrink-0 px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-1 active:scale-95" data-code="${item.code}">
-              <i class="fa-solid fa-triangle-exclamation text-[11px]"></i>
+            <button type="button" class="btn-open-equip-detail shrink-0 px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-1.5 active:scale-95" data-code="${item.code}">
+              <i class="fa-solid fa-triangle-exclamation text-xs"></i>
               <span>이상 수정</span>
             </button>
           `;
@@ -1489,12 +1486,14 @@
         const tpl = templateMasterList.find(t => t.id === item.templateId) || templateMasterList[0];
         const itemMajor = item.majorCategory || "소화설비";
 
+        // 데스크톱 Web 고밀도 가로형 + 모바일 최적 반응형 레이아웃
         return `
-          <div class="equip-card-item cursor-pointer bg-white rounded-2xl p-3.5 sm:p-4 border ${borderClass} shadow-xs hover:shadow-md transition-all active:scale-[0.99]" data-code="${item.code}">
-            <div class="flex items-start justify-between gap-2.5 sm:gap-3">
+          <div class="equip-card-item cursor-pointer bg-white rounded-2xl p-3 sm:p-4 border ${borderClass} shadow-xs hover:shadow-md transition-all active:scale-[0.99]" data-code="${item.code}">
+            <div class="flex items-start sm:items-center justify-between gap-3">
               <div class="space-y-1 min-w-0 flex-1">
-                <div class="flex flex-wrap items-center gap-1 sm:gap-2">
-                  <span class="font-mono-code font-bold text-xs sm:text-sm text-slate-900 flex items-center gap-1">
+                <!-- 상단 태그 배지 라인 -->
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="font-mono-code font-bold text-xs sm:text-[13px] text-slate-900 flex items-center gap-1">
                     <i class="fa-solid fa-qrcode text-rose-500 text-[11px]"></i>
                     <span class="break-all">${item.code}</span>
                   </span>
@@ -1507,23 +1506,30 @@
                   <span class="px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-slate-100 text-slate-700">#${item.area}</span>
                   ${statusBadge}
                 </div>
+
+                <!-- 위치 및 세부 정보 라인 -->
                 <p class="text-xs sm:text-sm text-slate-800 font-bold leading-snug">
                   ${item.facility} ${item.floor} &rsaquo; ${item.room} <span class="font-normal text-slate-500">(${item.detailLoc})</span>
                 </p>
+
+                <!-- 스펙 및 매핑 점검표 라인 -->
                 <div class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[10px] sm:text-[11px] text-slate-500">
                   <span class="font-semibold text-slate-800">${item.name}</span>
                   <span class="truncate">점검표: <b class="text-indigo-600 font-bold">${tpl.name}</b></span>
                   ${item.agent ? `<span>약제: ${item.agent} (${item.amount})</span>` : ''}
                   ${item.expire ? `<span>충전기한: <b class="font-mono text-slate-700">${item.expire}</b></span>` : ''}
                 </div>
+
                 ${isDone ? `
-                  <div class="pt-1 flex flex-wrap items-center gap-1.5 text-[10px] sm:text-[11px]">
+                  <div class="pt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] sm:text-[11px]">
                     <span class="text-slate-500"><i class="fa-solid fa-calendar-check text-emerald-500 mr-1"></i>${rec.date} (${rec.inspector})</span>
                     ${rec.note ? `<span class="text-rose-600 font-semibold bg-rose-50 px-2 py-0.5 rounded border border-rose-100">특이: ${rec.note}</span>` : ''}
                   </div>
                 ` : ''}
               </div>
-              <div class="shrink-0 flex items-center">
+
+              <!-- 우측 액션 버튼 (데스크톱 고밀도 정렬) -->
+              <div class="shrink-0 flex items-center pt-1 sm:pt-0">
                 ${actionBtn}
               </div>
             </div>
@@ -1810,12 +1816,13 @@
           equipMasterList = equipMasterList.filter(e => e.code !== code);
           saveEquipMaster();
           renderMasterViews();
+          populateEquipDropdownFilters();
           renderEquipCards();
           showToast(`${code} 설비가 삭제되었습니다.`);
         });
       });
 
-      // 2. 설비 분류 체계 마스터 렌더링
+      // 2. 설비 분류 체계 마스터
       const tbodyCategory = document.getElementById("masterCategoryTableBody");
       if (tbodyCategory) {
         tbodyCategory.innerHTML = categoryHierarchyList.map(cat => {
@@ -1941,7 +1948,7 @@
         });
       });
 
-      // 4. 점검표 템플릿 마스터 렌더링
+      // 4. 점검표 템플릿 마스터
       const tplContainer = document.getElementById("masterTplContainer");
       tplContainer.innerHTML = templateMasterList.map(tpl => {
         const assignedEquips = equipMasterList.filter(e => e.templateId === tpl.id).length;
@@ -2006,7 +2013,6 @@
       const delBtn = document.getElementById("btnDeleteCategoryGroupInModal");
       const tplSelect = document.getElementById("editCategoryTpl");
 
-      // 템플릿 드롭다운 채우기
       tplSelect.innerHTML = templateMasterList.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
 
       if (catId) {
@@ -2082,7 +2088,6 @@
       const titleElem = document.getElementById("templateModalTitle");
       const delBtn = document.getElementById("btnDeleteTplInModal");
 
-      // 시스템에 등록된 모든 세부종류 추출
       const allSubTypes = [...new Set([
         ...categoryHierarchyList.flatMap(c => c.subTypes || []),
         ...equipMasterList.map(e => e.name)
@@ -2115,7 +2120,6 @@
 
       document.getElementById("chkApplyTplToExistingEquips").checked = false;
 
-      // 대응 장비 종류 칩 렌더링
       const subContainer = document.getElementById("editTplSubTypesContainer");
       subContainer.innerHTML = allSubTypes.map(st => {
         const isChecked = currentTplAppliedSubTypes.includes(st);
@@ -2482,11 +2486,13 @@
       let passes = 0;
       let issues = 0;
 
+      const areaVal = document.getElementById("equipFilterArea")?.value || selectedArea || "";
+
       if (currentMode === "equip") {
         document.getElementById("statModeTitle").textContent = "1. 시설장비 예방점검";
-        document.getElementById("statTargetScopeDisplay").textContent = selectedArea ? `MY AREA: #${selectedArea}` : "전체 설비 대상";
+        document.getElementById("statTargetScopeDisplay").textContent = areaVal ? `MY AREA: #${areaVal}` : "전체 설비 대상";
         
-        const targetList = selectedArea ? equipMasterList.filter(e => e.area === selectedArea) : equipMasterList;
+        const targetList = areaVal ? equipMasterList.filter(e => e.area === areaVal) : equipMasterList;
         total = targetList.length;
 
         targetList.forEach(e => {
@@ -2690,7 +2696,6 @@
       const room = prompt("설치위치(룸명)를 입력하세요:", "[B0101] 지하 크린룸") || "[B0101] 지하 크린룸";
       const area = prompt("My Area 코드를 입력하세요 (A00~A06, RA00):", "A00") || "A00";
 
-      // 템플릿 매핑 자동 결정
       let tplId = "TPL_FIRE_EXT";
       const matchedTpl = templateMasterList.find(t => (t.appliedSubTypes || []).includes(name.trim()));
       if (matchedTpl) tplId = matchedTpl.id;
@@ -2840,7 +2845,6 @@
         });
       }
 
-      // 대응 설비 원장에 즉시 일괄 반영
       if (applyExisting && currentTplAppliedSubTypes.length > 0) {
         let count = 0;
         equipMasterList.forEach(e => {
@@ -2874,13 +2878,21 @@
     // 필터 리셋 버튼
     document.getElementById("btnEquipResetFilter").addEventListener("click", () => {
       selectedArea = "";
+      if (document.getElementById("equipFilterArea")) document.getElementById("equipFilterArea").value = "";
       if (document.getElementById("equipFilterMajorCat")) document.getElementById("equipFilterMajorCat").value = "";
       if (document.getElementById("equipFilterCategory")) document.getElementById("equipFilterCategory").value = "";
-      document.getElementById("equipFilterFacility").value = "";
-      document.getElementById("equipFilterFloor").value = "";
-      document.getElementById("equipFilterRoom").value = "";
-      document.getElementById("equipFilterSearch").value = "";
-      renderEquipAreaChips();
+      if (document.getElementById("equipFilterFacility")) document.getElementById("equipFilterFacility").value = "";
+      if (document.getElementById("equipFilterFloor")) document.getElementById("equipFilterFloor").value = "";
+      if (document.getElementById("equipFilterRoom")) document.getElementById("equipFilterRoom").value = "";
+      if (document.getElementById("equipFilterSearch")) document.getElementById("equipFilterSearch").value = "";
+      populateEquipDropdownFilters();
+      renderEquipCards();
+      updateStatusMetrics();
+    });
+
+    // MY AREA 드롭다운 변경 이벤트
+    document.getElementById("equipFilterArea")?.addEventListener("change", (e) => {
+      selectedArea = e.target.value;
       populateEquipDropdownFilters();
       renderEquipCards();
       updateStatusMetrics();
@@ -2892,7 +2904,7 @@
       renderEquipCards();
     });
 
-    // 드롭다운 및 검색 이벤트
+    // 기타 드롭다운 및 검색 이벤트
     ["equipFilterCategory", "equipFilterFacility", "equipFilterFloor", "equipFilterRoom"].forEach(id => {
       document.getElementById(id)?.addEventListener("change", renderEquipCards);
     });
@@ -3021,7 +3033,6 @@
       setupMainInspectorControls();
       deriveZonesAndAreasFromEquips();
 
-      renderEquipAreaChips();
       populateEquipDropdownFilters();
       renderEquipCards();
       renderAreaCards();
