@@ -93,6 +93,10 @@
           <span id="netStatusText">온라인</span>
         </div>
         
+        <button id="btnManualAutoSync" title="구글시트 최신 데이터 실시간 새로고침" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-indigo-600 hover:text-indigo-950 hover:bg-indigo-50 rounded-xl border border-indigo-200 transition-colors">
+          <i id="iconAutoSyncSpin" class="fa-solid fa-arrows-rotate text-sm sm:text-base"></i>
+        </button>
+        
         <button id="btnExportData" title="전체 점검결과 CSV 다운로드" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors">
           <i class="fa-solid fa-file-excel text-sm sm:text-base text-emerald-600"></i>
         </button>
@@ -1054,8 +1058,8 @@
       { id: "ZONE_R0101", name: "진위연구소 실험동", facility: "[WH02] 진위연구소", floor: "1F", dept: "선행연구팀" }
     ];
 
-    // 기본 Google Apps Script 웹 앱 URL
-    const DEFAULT_GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzbTcTZ0BU-Y6jAb0MWjelgEWiZErWK80jUbCg58csi4Qq-28V_zmPmqmP8LTLr_kTV/exec";
+    // 기본 Google Apps Script 웹 앱 URL (실제 배포 엔드포인트)
+    const DEFAULT_GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzUei-zI9cjkOx6Ags8bvTc1NyfUspgp4u_kQegV-7rss8h1KvTl1YZPxKCu3bUB-Kw/exec";
 
     let currentMode = "equip";
     let isMasterUnlocked = false;
@@ -2085,7 +2089,13 @@
     }
 
     function getGoogleScriptUrl() {
-      return localStorage.getItem("SAFETYCHECK_GOOGLE_SCRIPT_URL") || DEFAULT_GOOGLE_SCRIPT_URL;
+      const stored = localStorage.getItem("SAFETYCHECK_GOOGLE_SCRIPT_URL");
+      // 기존 기기 로컬에 예전 임시 URL이 남아있는 경우 새 배포 URL로 자동 갱신
+      if (stored && stored.includes("AKfycbzbTcTZ0BU-Y6jAb0MWjelgEWiZErWK80jUbCg58csi4Qq-28V_zmPmqmP8LTLr_kTV")) {
+        localStorage.setItem("SAFETYCHECK_GOOGLE_SCRIPT_URL", DEFAULT_GOOGLE_SCRIPT_URL);
+        return DEFAULT_GOOGLE_SCRIPT_URL;
+      }
+      return stored || DEFAULT_GOOGLE_SCRIPT_URL;
     }
 
     function setGoogleScriptUrl(url) {
@@ -3363,6 +3373,106 @@
       document.getElementById("netStatusBadge").className = "flex items-center space-x-1 px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-amber-50 border border-amber-200 text-amber-700";
     });
 
+    /**
+     * 앱 시작 시 또는 새로고침 아이콘 클릭 시
+     * 구글 시트의 최신 기준정보와 점검기록을 백그라운드에서 자동 동기화하는 핵심 함수
+     */
+    async function performAutoCloudSync(showToastOnSuccess = false) {
+      const url = getGoogleScriptUrl();
+      if (!url) return;
+
+      const syncIcon = document.getElementById("iconAutoSyncSpin");
+      if (syncIcon) syncIcon.classList.add("fa-spin");
+
+      try {
+        // 1. 구글 시트 기준정보(설비 원장) 가져오기
+        const resMaster = await fetch(url + (url.includes("?") ? "&" : "?") + "action=getMaster", { method: "GET" });
+        if (resMaster.ok) {
+          const masterData = await resMaster.json();
+          if (Array.isArray(masterData) && masterData.length > 0) {
+            equipMasterList = masterData.map(item => ({
+              code: item.code || "",
+              facility: item.facility || "",
+              floor: item.floor || "",
+              room: item.room || "",
+              equipCode: item.equipCode || "",
+              no: item.no || "",
+              majorCategory: item.majorCategory || "소화설비",
+              name: item.name || "소화기",
+              detailLoc: item.detailLoc || "",
+              agent: item.agent || "",
+              amount: item.amount || "",
+              expire: item.expire || "",
+              area: item.area || "A00",
+              mgmtNo: item.mgmtNo || "",
+              dept: item.dept || "",
+              templateId: item.templateId || "TPL_FIRE_EXT"
+            }));
+            saveEquipMaster();
+            deriveZonesAndAreasFromEquips();
+          }
+        }
+
+        // 2. 구글 시트 점검기록 가져오기 (다른 기기 또는 PC에서 입력한 완료건 반영)
+        const resRecords = await fetch(url + (url.includes("?") ? "&" : "?") + "action=getRecords", { method: "GET" });
+        if (resRecords.ok) {
+          const recordsData = await resRecords.json();
+          if (Array.isArray(recordsData) && recordsData.length > 0) {
+            recordsData.forEach(r => {
+              if (!r.targetId) return;
+              const mode = r.mode || (r.targetId.startsWith("A") && r.targetId.length <= 4 ? "AREA" : (r.targetId.startsWith("ZONE") ? "ZONE" : "EQUIP"));
+              const key = `${mode}_${r.targetId}`;
+
+              const checks = {};
+              for (let i = 1; i <= 10; i++) {
+                const val = r[`item_${i}`];
+                if (val !== undefined && val !== "") checks[`ITEM_${i}`] = val;
+              }
+
+              inspectionRecords[key] = {
+                mode: mode,
+                targetId: r.targetId,
+                mgmtNo: r.mgmtNo || "",
+                name: r.name || r.title || r.targetId,
+                title: `${r.targetId} (${r.mgmtNo || ''})`,
+                sub: r.sub || "",
+                status: (r.status === "PASS" || r.status === "O" || r.status === "양호") ? "PASS" : "ISSUE",
+                checks: checks,
+                note: r.note || "",
+                templateName: r.templateName || "",
+                inspector: r.inspector || "PC담당자",
+                date: formatToYYYYMMDD(r.date || new Date().toISOString().split("T")[0]),
+                timestamp: Date.now()
+              };
+            });
+            saveRecords();
+          }
+        }
+
+        // 3. UI 갱신
+        populateEquipDropdownFilters();
+        renderEquipCards();
+        renderAreaCards();
+        renderZoneCards();
+        renderInspectionHistory();
+        renderMasterViews();
+        updateStatusMetrics();
+
+        const nowStr = new Date().toLocaleString();
+        localStorage.setItem("SAFETYCHECK_GOOGLE_LAST_SYNC", nowStr);
+        const syncTimeElem = document.getElementById("lastGoogleSyncTime");
+        if (syncTimeElem) syncTimeElem.textContent = nowStr;
+
+        if (showToastOnSuccess) {
+          showToast(`구글시트 최신 데이터 동기화 완료 (${equipMasterList.length}개 설비)`);
+        }
+      } catch (err) {
+        console.warn("자동 동기화 일시 오류 (로컬 캐시 사용):", err);
+      } finally {
+        if (syncIcon) syncIcon.classList.remove("fa-spin");
+      }
+    }
+
     function setupMainInspectorControls() {
       const nameInput = document.getElementById("mainInspectorName");
       const dateInput = document.getElementById("mainInspectionDate");
@@ -3398,6 +3508,7 @@
       setupMainInspectorControls();
       deriveZonesAndAreasFromEquips();
 
+      // 1차: 로컬 캐시 데이터로 즉시 UI 렌더링 (지연 없는 반응성)
       populateEquipDropdownFilters();
       updateActiveStatusFilterIndicator();
       renderEquipCards();
@@ -3405,6 +3516,14 @@
       renderZoneCards();
       renderInspectionHistory();
       updateStatusMetrics();
+
+      // 수동 실시간 새로고침 버튼 바인딩
+      document.getElementById("btnManualAutoSync")?.addEventListener("click", () => {
+        performAutoCloudSync(true);
+      });
+
+      // 2차: 백그라운드에서 구글 시트의 최신 원장 및 점검기록 자동 수신
+      performAutoCloudSync(false);
     };
   </script>
 </body>
