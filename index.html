@@ -809,9 +809,13 @@
             <span>대응 설비 세부 종류 지정 (해당 장비 점검 시 이 점검표 자동 호출)</span>
           </label>
           <div id="editTplSubTypesContainer" class="flex flex-wrap gap-1.5 py-1"></div>
+          <div class="flex items-center gap-1.5 pt-1">
+            <input type="text" id="newTplSubTypeInput" placeholder="직접 추가할 설비종류명 (예: 전열기구, 멀티탭 등)..." class="flex-1 bg-white border border-indigo-200 rounded-lg p-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <button type="button" id="btnAddSubTypeToTpl" class="px-2.5 py-1.5 bg-indigo-600 text-white rounded-lg font-bold text-xs shrink-0 hover:bg-indigo-700 cursor-pointer">+ 종류 등록</button>
+          </div>
           <div class="flex items-center gap-2 pt-1">
             <label class="flex items-center gap-1.5 text-[11px] font-bold text-indigo-900 cursor-pointer">
-              <input type="checkbox" id="chkApplyTplToExistingEquips" class="w-3.5 h-3.5 rounded text-indigo-600">
+              <input type="checkbox" id="chkApplyTplToExistingEquips" checked class="w-3.5 h-3.5 rounded text-indigo-600">
               <span>현재 등록된 위 해당 설비 원장 데이터에도 이 점검표를 즉시 일괄 적용</span>
             </label>
           </div>
@@ -908,6 +912,31 @@
         return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
       }
       return str;
+    }
+
+    // 설비 명칭 및 대응설비 설정 기반 동적 점검표 매핑 함수
+    function getTemplateForEquip(equip) {
+      if (!equip) return templateMasterList[0];
+      // 1. 점검표 템플릿 중 appliedSubTypes에 설비 명칭이 포함된 템플릿 우선 매핑
+      const matchedTpl = templateMasterList.find(t => 
+        Array.isArray(t.appliedSubTypes) && (t.appliedSubTypes.includes(equip.name) || t.appliedSubTypes.some(st => (equip.name || '').includes(st)))
+      );
+      if (matchedTpl) return matchedTpl;
+
+      // 2. 설비 객체에 직접 지정된 templateId 매핑
+      if (equip.templateId) {
+        const byId = templateMasterList.find(t => t.id === equip.templateId);
+        if (byId) return byId;
+      }
+
+      // 3. 분류 체계(대분류)의 기본 템플릿 탐색
+      const cat = categoryHierarchyList.find(c => Array.isArray(c.subTypes) && c.subTypes.some(st => (equip.name || '').includes(st)));
+      if (cat && cat.defaultTpl) {
+        const byCat = templateMasterList.find(t => t.id === cat.defaultTpl);
+        if (byCat) return byCat;
+      }
+
+      return templateMasterList[0];
     }
 
     // 템플릿 마스터 초기 정의
@@ -1034,7 +1063,8 @@
       }
     ];
 
-    const AREAS_MASTER = [
+    // 기본 MY AREA 정의 (기준정보에 새로운 Area 코드가 있으면 자동 확장됨)
+    const DEFAULT_AREAS = [
       { id: "A00", name: "유틸리티 & 옥외", tplId: "TPL_AREA_UTIL", desc: "기계실, 변전실, 발전기실, 옥외 가스/폐기물" },
       { id: "A01", name: "1층 GSS 크린룸", tplId: "TPL_AREA_CLEAN", desc: "GSS 크린룸, 용접실, 최종검사실" },
       { id: "A02", name: "1층 출하 & 창고", tplId: "TPL_AREA_CLEAN", desc: "출하장, 반출입도크, 자재/소모품 창고" },
@@ -1193,9 +1223,26 @@
       zoneMasterList = DEFAULT_ZONES;
     }
 
+    // [신규] 동적 MY AREA 마스터 로드 및 저장 관리
+    let areaMasterList = [];
+    try {
+      const savedAreas = localStorage.getItem("SAFETYCHECK_AREAS_V3");
+      if (savedAreas) areaMasterList = JSON.parse(savedAreas);
+      else areaMasterList = [...DEFAULT_AREAS];
+    } catch(e) {
+      areaMasterList = [...DEFAULT_AREAS];
+    }
+
+    function saveAreaMaster() {
+      try {
+        localStorage.setItem("SAFETYCHECK_AREAS_V3", JSON.stringify(areaMasterList));
+      } catch(e) {}
+    }
+
     function deriveZonesAndAreasFromEquips() {
       if (!Array.isArray(equipMasterList) || equipMasterList.length === 0) return;
 
+      // 1. 설비 데이터 기반 MY ZONE (룸/부서) 동적 추출
       const roomMap = new Map();
       equipMasterList.forEach(e => {
         if (!e.room) return;
@@ -1238,6 +1285,43 @@
       try {
         localStorage.setItem("SAFETYCHECK_ZONES_V3", JSON.stringify(zoneMasterList));
       } catch (err) {}
+
+      // 2. [핵심 기능] 설비 기준정보의 area 코드를 분석하여 MY AREA 마스터 자동 생성 및 동기화 (예: E01 등)
+      const currentAreaCodes = new Set(areaMasterList.map(a => a.id));
+      let hasNewArea = false;
+
+      equipMasterList.forEach(e => {
+        const areaCode = (e.area || "").trim();
+        if (areaCode && !currentAreaCodes.has(areaCode)) {
+          // 신규 Area 코드 발견 시 기본 속성 자동 정의
+          let defaultName = `${areaCode} 전열·전기 관리구역`;
+          let defaultDesc = `설비 기준정보 등록 구역 (${areaCode})`;
+          let defaultTpl = "TPL_AREA_OFFICE";
+
+          if (areaCode.toUpperCase().startsWith("E")) {
+            defaultName = `${areaCode} 전열·전기 설비구역`;
+            defaultDesc = "전열전기기구 및 콘센트/분전함 화재예방 순찰 구역";
+            defaultTpl = "TPL_AREA_OFFICE";
+          } else if (areaCode.toUpperCase().startsWith("A")) {
+            defaultName = `${areaCode} 신규 방화구역`;
+            defaultDesc = `${e.room || ''} 소방시설물 점검 구역`;
+            defaultTpl = "TPL_AREA_CLEAN";
+          }
+
+          areaMasterList.push({
+            id: areaCode,
+            name: defaultName,
+            tplId: defaultTpl,
+            desc: defaultDesc
+          });
+          currentAreaCodes.add(areaCode);
+          hasNewArea = true;
+        }
+      });
+
+      if (hasNewArea) {
+        saveAreaMaster();
+      }
     }
 
     function saveRecords() {
@@ -1457,7 +1541,7 @@
       // 1. MY AREA 옵션 구성
       if (areaSelect && changedFilter !== "area") {
         let areaOptions = `<option value="">전체 MY AREA (${equipMasterList.length}개소)</option>`;
-        AREAS_MASTER.forEach(a => {
+        areaMasterList.forEach(a => {
           const count = equipMasterList.filter(e => e.area === a.id).length;
           areaOptions += `<option value="${a.id}">#${a.id} - ${a.name} (${count}개소)</option>`;
         });
@@ -1671,7 +1755,7 @@
           `;
         }
 
-        const tpl = templateMasterList.find(t => t.id === item.templateId) || templateMasterList[0];
+        const tpl = getTemplateForEquip(item);
         const itemMajor = item.majorCategory || "소화설비";
 
         return `
@@ -1725,14 +1809,15 @@
           const code = card.getAttribute("data-code");
           const equip = equipMasterList.find(e => e.code === code);
           if (!equip) return;
-          openInspectionModal("EQUIP", code, equip.mgmtNo, equip.name, `${equip.facility} ${equip.floor} ${equip.room} (${equip.detailLoc})`, equip.templateId);
+          const tpl = getTemplateForEquip(equip);
+          openInspectionModal("EQUIP", code, equip.mgmtNo, equip.name, `${equip.facility} ${equip.floor} ${equip.room} (${equip.detailLoc})`, tpl.id);
         });
       });
     }
 
     function renderAreaCards() {
       const container = document.getElementById("areaCardsContainer");
-      container.innerHTML = AREAS_MASTER.map(area => {
+      container.innerHTML = areaMasterList.map(area => {
         const key = `AREA_${area.id}`;
         const rec = inspectionRecords[key];
         const isDone = !!rec;
@@ -1794,7 +1879,7 @@
       container.querySelectorAll(".area-card-item").forEach(card => {
         card.addEventListener("click", () => {
           const id = card.getAttribute("data-id");
-          const area = AREAS_MASTER.find(a => a.id === id);
+          const area = areaMasterList.find(a => a.id === id);
           if (!area) return;
           openInspectionModal("AREA", id, id, area.name, area.desc, area.tplId);
         });
@@ -1917,10 +2002,10 @@
           }
         });
       } else if (currentHistorySubTab === "AREA") {
-        targetTotal = AREAS_MASTER.length;
+        targetTotal = areaMasterList.length;
         badgeElem.textContent = "2. MY AREA";
         badgeElem.className = "px-2 py-0.5 rounded text-[11px] font-extrabold bg-indigo-100 text-indigo-800";
-        AREAS_MASTER.forEach(a => {
+        areaMasterList.forEach(a => {
           const rec = inspectionRecords[`AREA_${a.id}`];
           if (rec) {
             completed++;
@@ -1941,7 +2026,7 @@
           }
         });
       } else {
-        targetTotal = equipMasterList.length + AREAS_MASTER.length + zoneMasterList.length;
+        targetTotal = equipMasterList.length + areaMasterList.length + zoneMasterList.length;
         badgeElem.textContent = "전체 통합";
         badgeElem.className = "px-2 py-0.5 rounded text-[11px] font-extrabold bg-teal-100 text-teal-800";
         Object.values(inspectionRecords).forEach(r => {
@@ -2765,11 +2850,6 @@
       const titleElem = document.getElementById("templateModalTitle");
       const delBtn = document.getElementById("btnDeleteTplInModal");
 
-      const allSubTypes = [...new Set([
-        ...categoryHierarchyList.flatMap(c => c.subTypes || []),
-        ...equipMasterList.map(e => e.name)
-      ])].filter(Boolean);
-
       if (tplId) {
         const tpl = templateMasterList.find(t => t.id === tplId);
         if (!tpl) return;
@@ -2795,9 +2875,30 @@
         delBtn.classList.add("hidden");
       }
 
-      document.getElementById("chkApplyTplToExistingEquips").checked = false;
+      document.getElementById("chkApplyTplToExistingEquips").checked = true;
 
+      renderTplSubTypesChips();
+      renderTplItemRows();
+      renderTplQuickNoteChips();
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function renderTplSubTypesChips() {
       const subContainer = document.getElementById("editTplSubTypesContainer");
+      if (!subContainer) return;
+
+      const allSubTypes = [...new Set([
+        ...categoryHierarchyList.flatMap(c => c.subTypes || []),
+        ...equipMasterList.map(e => e.name),
+        ...currentTplAppliedSubTypes
+      ])].filter(Boolean);
+
+      if (allSubTypes.length === 0) {
+        subContainer.innerHTML = `<span class="text-slate-400 text-[11px]">등록된 설비 종류가 없습니다. 직접 입력하여 추가하세요.</span>`;
+        return;
+      }
+
       subContainer.innerHTML = allSubTypes.map(st => {
         const isChecked = currentTplAppliedSubTypes.includes(st);
         return `
@@ -2815,14 +2916,9 @@
           } else {
             currentTplAppliedSubTypes.push(st);
           }
-          openTemplateEditModal(document.getElementById("editTplId").value || null);
+          renderTplSubTypesChips();
         });
       });
-
-      renderTplItemRows();
-      renderTplQuickNoteChips();
-      modal.classList.remove("hidden");
-      modal.classList.add("flex");
     }
 
     function closeTemplateEditModal() {
@@ -2943,9 +3039,9 @@
       } else if (currentMode === "area") {
         document.getElementById("statModeTitle").textContent = "2. MY AREA 순찰점검";
         document.getElementById("statTargetScopeDisplay").textContent = "전체 구역 순찰포인트";
-        total = AREAS_MASTER.length;
+        total = areaMasterList.length;
 
-        AREAS_MASTER.forEach(a => {
+        areaMasterList.forEach(a => {
           const rec = inspectionRecords[`AREA_${a.id}`];
           if (rec) {
             completed++;
@@ -2969,7 +3065,7 @@
           }
         });
       } else {
-        total = equipMasterList.length + AREAS_MASTER.length + zoneMasterList.length;
+        total = equipMasterList.length + areaMasterList.length + zoneMasterList.length;
         completed = Object.keys(inspectionRecords).length;
         Object.values(inspectionRecords).forEach(r => {
           if (r.status === "PASS") passes++;
@@ -3258,6 +3354,18 @@
       }
     });
 
+    document.getElementById("btnAddSubTypeToTpl")?.addEventListener("click", () => {
+      const inp = document.getElementById("newTplSubTypeInput");
+      const val = inp?.value.trim();
+      if (val) {
+        if (!currentTplAppliedSubTypes.includes(val)) {
+          currentTplAppliedSubTypes.push(val);
+        }
+        inp.value = "";
+        renderTplSubTypesChips();
+      }
+    });
+
     document.getElementById("btnSaveTemplateEditModal")?.addEventListener("click", () => {
       const tplId = document.getElementById("editTplId").value;
       const name = document.getElementById("editTplName").value.trim() || "새 점검표";
@@ -3289,20 +3397,19 @@
       if (applyExisting && currentTplAppliedSubTypes.length > 0) {
         let count = 0;
         equipMasterList.forEach(e => {
-          if (currentTplAppliedSubTypes.includes(e.name)) {
+          if (currentTplAppliedSubTypes.includes(e.name) || currentTplAppliedSubTypes.some(st => (e.name || '').includes(st))) {
             e.templateId = savedId;
             count++;
           }
         });
         saveEquipMaster();
-        showToast(`${count}대 설비에 '${name}' 점검표가 일괄 적용되었습니다.`);
       }
 
       saveTemplateMaster();
       closeTemplateEditModal();
       renderMasterViews();
       renderEquipCards();
-      showToast(`'${name}' 점검표가 안전하게 저장되었습니다.`);
+      showToast(`'${name}' 점검표가 대응설비(${currentTplAppliedSubTypes.join(', ') || '없음'})와 연계되어 저장되었습니다.`);
     });
 
     document.getElementById("btnDeleteTplInModal")?.addEventListener("click", () => {
