@@ -667,11 +667,14 @@
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <input type="text" id="googleScriptUrlInput" placeholder="https://script.google.com/macros/s/.../exec"
                 class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-              <div class="flex items-center gap-1.5 shrink-0">
+              <div class="flex items-center gap-1.5 shrink-0 flex-wrap">
                 <button id="btnSaveGoogleUrl" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer">
                   <i class="fa-solid fa-floppy-disk mr-1"></i> URL 저장
                 </button>
-                <button id="btnResetDefaultGoogleUrl" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-colors cursor-pointer" title="기본 등록된 구글 URL로 복원">
+                <button id="btnCopyShareUrl" class="px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition-colors cursor-pointer" title="이 설정 URL이 포함된 모바일 접속 링크 복사">
+                  <i class="fa-solid fa-share-nodes mr-1"></i> 설정 공유링크 복사
+                </button>
+                <button id="btnResetDefaultGoogleUrl" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-colors cursor-pointer" title="코드에 내장된 기본 구글 URL로 복원">
                   기본 URL 복원
                 </button>
               </div>
@@ -1330,7 +1333,11 @@
       { id: "ZONE_R0101", name: "진위연구소 실험동", facility: "[WH02] 진위연구소", floor: "1F", dept: "선행연구팀", cycle: "월간" }
     ];
 
-    const DEFAULT_GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzUei-zI9cjkOx6Ags8bvTc1NyfUspgp4u_kQegV-7rss8h1KvTl1YZPxKCu3bUB-Kw/exec";
+    const DEFAULT_GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyehe8z0S7Zcb6UG7J4Gefus4j63nE_cXxM4f7cprnGWdJ1Ta7OzvbWRfKZpZVLN_zS/exec";
+    const LEGACY_GOOGLE_SCRIPT_URLS = [
+      "AKfycbzbTcTZ0BU-Y6jAb0MWjelgEWiZErWK80jUbCg58csi4Qq-28V_zmPmqmP8LTLr_kTV",
+      "AKfycbzUei-zI9cjkOx6Ags8bvTc1NyfUspgp4u_kQegV-7rss8h1KvTl1YZPxKCu3bUB-Kw"
+    ];
 
     // ==================== 전역 상태 관리 ====================
     let currentMode = "equip";
@@ -2791,8 +2798,20 @@
 
     // ==================== 구글 시트 양방향 연동 ====================
     function getGoogleScriptUrl() {
+      // 1. 접속 링크 쿼리 파라미터(?url=...)가 전달된 경우 최우선 적용 및 저장
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const paramUrl = params.get("url") || params.get("gasUrl");
+        if (paramUrl && paramUrl.startsWith("https://script.google.com/")) {
+          localStorage.setItem("SAFETYCHECK_GOOGLE_SCRIPT_URL", paramUrl.trim());
+          window.history.replaceState({}, document.title, window.location.pathname);
+          return paramUrl.trim();
+        }
+      } catch(e) {}
+
+      // 2. 기존 브라우저 캐시에 옛날 기본 URL이 남아있다면 새 기본 URL로 자동 마이그레이션
       const stored = localStorage.getItem("SAFETYCHECK_GOOGLE_SCRIPT_URL");
-      if (stored && stored.includes("AKfycbzbTcTZ0BU-Y6jAb0MWjelgEWiZErWK80jUbCg58csi4Qq-28V_zmPmqmP8LTLr_kTV")) {
+      if (stored && LEGACY_GOOGLE_SCRIPT_URLS.some(oldId => stored.includes(oldId))) {
         localStorage.setItem("SAFETYCHECK_GOOGLE_SCRIPT_URL", DEFAULT_GOOGLE_SCRIPT_URL);
         return DEFAULT_GOOGLE_SCRIPT_URL;
       }
@@ -4151,6 +4170,18 @@
       showToast("기본 등록된 구글 스크립트 URL로 복원되었습니다.");
     });
 
+    document.getElementById("btnCopyShareUrl")?.addEventListener("click", () => {
+      const currentGasUrl = getGoogleScriptUrl();
+      const shareLink = `${window.location.origin}${window.location.pathname}?url=${encodeURIComponent(currentGasUrl)}`;
+      const tempInput = document.createElement("textarea");
+      tempInput.value = shareLink;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
+      showToast("설정 URL이 포함된 접속 링크가 복사되었습니다. 모바일에서 열어주세요!");
+    });
+
     document.getElementById("btnClearInspectionRecords")?.addEventListener("click", async () => {
       const confirmed = await showCustomDialog({
         title: "로컬 캐시 점검 이력 초기화",
@@ -4211,10 +4242,12 @@
     // ==================== 클라우드 양방향 자동 동기화 (다중 기기 정합성) ====================
     async function performAutoCloudSync(showToastOnSuccess = false) {
       const url = getGoogleScriptUrl();
-      if (!url || !navigator.onLine) return;
+      if (!url) return;
 
       const syncIcon = document.getElementById("iconAutoSyncSpin");
+      const cloudText = document.getElementById("cloudSyncText");
       if (syncIcon) syncIcon.classList.add("fa-spin");
+      if (cloudText) cloudText.textContent = "시트 동기화 중...";
 
       try {
         // 0. 먼저 미전송 대기열이 있으면 구글시트로 밀어올리기
@@ -4222,8 +4255,9 @@
           await pushRecordsRealtime([...pendingSyncQueue], false);
         }
 
-        // 1. 기준정보(점검주기 포함) Pull
-        const resMaster = await fetch(url + (url.includes("?") ? "&" : "?") + "action=getMaster", { method: "GET" });
+        // 1. 기준정보(점검주기 포함) Pull (캐시 방지를 위해 타임스탬프 파라미터 추가)
+        const cacheBuster = `&t=${Date.now()}`;
+        const resMaster = await fetch(url + (url.includes("?") ? "&" : "?") + "action=getMaster" + cacheBuster, { method: "GET", cache: "no-store" });
         if (resMaster.ok) {
           const masterData = await resMaster.json();
           if (Array.isArray(masterData) && masterData.length > 0) {
@@ -4252,7 +4286,7 @@
         }
 
         // 2. 누적 점검 기록 Pull 및 기기 간 실시간 병합
-        const resRecords = await fetch(url + (url.includes("?") ? "&" : "?") + "action=getRecords", { method: "GET" });
+        const resRecords = await fetch(url + (url.includes("?") ? "&" : "?") + "action=getRecords" + cacheBuster, { method: "GET", cache: "no-store" });
         if (resRecords.ok) {
           const recordsData = await resRecords.json();
           if (Array.isArray(recordsData) && recordsData.length > 0) {
@@ -4319,8 +4353,12 @@
         }
       } catch (err) {
         console.warn("자동 동기화 일시 오류:", err);
+        if (showToastOnSuccess) {
+          showToast("구글시트 동기화 중 오류가 발생했습니다. 설정의 URL을 확인해주세요.", false);
+        }
       } finally {
         if (syncIcon) syncIcon.classList.remove("fa-spin");
+        updateOfflineQueueUI();
       }
     }
 
